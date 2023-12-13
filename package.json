@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prepare": "husky install",
+    "lint-staged": "lint-staged"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -65,7 +67,8 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "husky": "^8.0.0"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -87,5 +90,11 @@
   "prisma": {
     "schema": "./src/infra/database/prisma/schema.prisma",
     "migrations": "./src/infra/database/prisma/migrations"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.ts": [
+      "npm run lint",
+      "npm run format"
+    ]
   }
 }
