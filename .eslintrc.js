@@ -1,7 +1,7 @@
 module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
-        project: 'tsconfig.json',
+        project: __dirname + '/tsconfig.json',
         sourceType: 'module',
         tsconfigRootDir: __dirname,
     },
@@ -45,7 +45,10 @@ module.exports = {
                 argsIgnorePattern: '^_',
             },
         ],
-        'padding-line-between-statements': ['error', { blankLine: 'always', prev: '*', next: ['return', 'throw'] }],
+        'padding-line-between-statements': [
+            'error',
+            { blankLine: 'always', prev: '*', next: ['return', 'throw'] },
+        ],
         'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: false }],
         curly: 'error',
         'import/no-extraneous-dependencies': 'off',
