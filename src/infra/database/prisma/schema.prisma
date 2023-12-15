@@ -16,6 +16,19 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
   refreshToken String?   @map("refresh_token") @db.VarChar(255)
+  Project      Project[]
 
   @@map("users")
+}
+
+model Project {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  userId    Int       @map("user_id")
+  User      User      @relation(fields: [userId], references: [id])
+
+  @@map("projects")
 }

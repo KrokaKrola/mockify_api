@@ -11,5 +11,7 @@ export const appConfigSchema = Joi.object({
     DB_NAME: Joi.string().required(),
     DATABASE_URL: Joi.string()
         .required()
-        .default('postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public'),
+        .default(
+            'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public',
+        ),
 });
