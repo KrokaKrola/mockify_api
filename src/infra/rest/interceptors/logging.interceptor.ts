@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import * as chalk from 'chalk';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
@@ -19,13 +19,31 @@ export class LoggingInterceptor implements NestInterceptor {
         // Convert the method name to uppercase and then apply chalk
         const fieldName = chalk.hex('#e3fc17').bold(methodName.toUpperCase());
 
-        const start = new Date().getTime();
+        const start = performance.now();
 
         return next.handle().pipe(
             tap(() => {
-                const end = new Date().getTime();
-                const tookTime = chalk.hex('#17e1fc').bold(`${end - start}ms`);
-                Logger.debug(`Path: ${parentType} Method: ${fieldName}, Took: ${tookTime}`, 'REST');
+                const end = performance.now();
+                const status = chalk
+                    .hex('#17e1fc')
+                    .bold(`${context.switchToHttp().getResponse().statusCode}`);
+                const tookTime = chalk.hex('#17e1fc').bold(`${(end - start).toFixed(0)}ms`);
+                Logger.debug(
+                    `🟣Path: ${parentType} Method: ${fieldName}, Status: ${status} Took: ${tookTime}`,
+                    'REST',
+                );
+            }),
+            catchError((error) => {
+                const end = performance.now();
+                const tookTime = chalk.hex('#17e1fc').bold(`${(end - start).toFixed(0)}ms`);
+                const status = chalk.hex('#fc1717').bold(error.status);
+                const message = chalk.hex('#fc1717').bold(error.message);
+                Logger.error(
+                    `🔴Path: ${parentType} Method: ${fieldName}, Took: ${tookTime}, Error status: ${status}, Error message: ${message}`,
+                    'REST',
+                );
+
+                return throwError(error); // rethrow the error to keep the error handling consistent
             }),
         );
     }
