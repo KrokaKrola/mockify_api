@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { SignUpRequest } from '../../../ui/requests/auth/sign-up.request';
 import { UserRepository } from '../../../infra/database/repositories/user.repository';
-import { UserExistException } from '../exceptions/user-exist.exception';
 import { AuthService } from '../../../domain/user/services/auth.service';
 import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { SignUpResponse } from '../../../ui/responses/auth/sign-up.response';
+import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 
 @Injectable()
 export class SignUpAction {
@@ -17,7 +17,7 @@ export class SignUpAction {
         const userExists = await this.userRepository.findByEmail(dto.email);
 
         if (userExists) {
-            throw new UserExistException('User already exists');
+            throw new ResourceExistsException('User already exists');
         }
 
         const passwordHash = await this.authService.hashValue(dto.password);

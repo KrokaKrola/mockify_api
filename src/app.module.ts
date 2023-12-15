@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { AppConfigModule } from './infra/ioc/app-config/app-config.module';
 import { loggingMiddleware, PrismaModule, QueryInfo } from 'nestjs-prisma';
 import { AuthModule } from './infra/ioc/auth/auth.module';
+import { ProjectsModule } from './infra/ioc/projects/projects.module';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from './infra/ioc/auth/auth.module';
             },
         }),
         AuthModule,
+        ProjectsModule,
     ],
 })
 export class AppModule {}
