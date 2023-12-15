@@ -23,4 +23,31 @@ export class ProjectRepository {
             },
         });
     }
+
+    public async findById(id: number): Promise<ProjectEntity> {
+        return this.prisma.project.findUnique({
+            where: {
+                id,
+            },
+        });
+    }
+
+    public async update(project: ProjectEntity): Promise<ProjectEntity> {
+        return this.prisma.project.update({
+            where: {
+                id: project.id,
+            },
+            data: {
+                name: project.name,
+            },
+        });
+    }
+
+    public async delete(id: number): Promise<void> {
+        await this.prisma.project.delete({
+            where: {
+                id,
+            },
+        });
+    }
 }
