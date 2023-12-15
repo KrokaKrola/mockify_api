@@ -40,8 +40,6 @@ async function bootstrap(): Promise<INestApplication> {
         );
     });
 
-    console.log('123213');
-
     await app.listen(configService.get('APP_PORT') || 3000);
 
     return app;
