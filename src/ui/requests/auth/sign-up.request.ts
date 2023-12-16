@@ -21,4 +21,11 @@ export class SignUpRequest {
     @MinLength(8)
     @Match<SignUpRequest>('password')
     public passwordConfirmation: string;
+
+    constructor(email: string, name: string, password: string, passwordConfirmation: string) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.passwordConfirmation = passwordConfirmation;
+    }
 }
