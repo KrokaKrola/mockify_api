@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../../../infra/database/repositories/user.repository';
 import { AccessDeniedException } from '../../../infra/exceptions/access-denied.exception';
 import { AuthService } from '../../../domain/user/services/auth.service';
@@ -17,11 +17,11 @@ export class RefreshTokensAction {
         const user = await this.userRepository.findById(id);
 
         if (!user) {
-            throw new AccessDeniedException();
+            throw new NotFoundException('User not found', 'user');
         }
 
         if (!user.refreshToken) {
-            throw new AccessDeniedException();
+            throw new NotFoundException('Refresh token not found', 'refreshToken');
         }
 
         const verifyResult = await this.authService.verifyHashValue(
