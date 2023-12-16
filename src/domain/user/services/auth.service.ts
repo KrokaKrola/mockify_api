@@ -22,8 +22,6 @@ export class AuthService {
     public async verifyHashValue(hashedData: string, data: string): Promise<boolean> {
         const hash = await this.hashValue(data);
 
-        console.log('hash', hash);
-
         return hash === hashedData;
     }
 

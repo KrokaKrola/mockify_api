@@ -14,6 +14,10 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'nestjs-prisma';
 import { SignUpResponse } from '../../responses/auth/sign-up.response';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
+import { SignInRequest } from '../../requests/auth/sign-in.request';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { SignInResponse } from '../../responses/auth/sign-in.response';
+import { InvalidCredentialsException } from '../../../application/user/exceptions/invalid-credentials.exception';
 
 describe('AuthController', () => {
     let authController: AuthController;
@@ -71,7 +75,7 @@ describe('AuthController', () => {
 
             const tokens = await authService.getTokens(1, signUpRequest.email);
 
-            jest.spyOn(userRepository, 'update').mockImplementation(() => {
+            const updateMock = jest.spyOn(userRepository, 'update').mockImplementation(() => {
                 return Promise.resolve(undefined);
             });
 
@@ -81,6 +85,12 @@ describe('AuthController', () => {
 
             const res = await authController.signUp(signUpRequest);
 
+            const hashedRefreshToken = await authService.hashValue(tokens.refreshToken);
+
+            expect(updateMock).toHaveBeenCalledWith({
+                id: 1,
+                refreshToken: hashedRefreshToken,
+            });
             expect(res).toEqual(
                 new SignUpResponse(
                     1,
@@ -119,6 +129,92 @@ describe('AuthController', () => {
                 expect(error.status).toEqual(404);
                 expect(error.message).toEqual('User already exists');
                 expect(error).toBeInstanceOf(ResourceExistsException);
+            }
+        });
+    });
+
+    describe('signIn', () => {
+        it('should return a valid SignInResponse', async () => {
+            const signInRequest = new SignInRequest('test@mail.com', '12345678');
+
+            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+                return Promise.resolve(
+                    new UserEntity(
+                        signInRequest.email,
+                        'Test',
+                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                        null,
+                        1,
+                    ),
+                );
+            });
+
+            const tokens = await authService.getTokens(1, signInRequest.email);
+
+            jest.spyOn(authService, 'getTokens').mockImplementation(() => {
+                return Promise.resolve(tokens);
+            });
+
+            const updateMock = jest.spyOn(userRepository, 'update').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            const response = await authController.signIn(signInRequest);
+
+            const hashedRefreshToken = await authService.hashValue(tokens.refreshToken);
+
+            expect(updateMock).toHaveBeenCalledWith({
+                id: 1,
+                refreshToken: hashedRefreshToken,
+            });
+            expect(response).toEqual(
+                new SignInResponse(
+                    1,
+                    signInRequest.email,
+                    'Test',
+                    tokens.accessToken,
+                    tokens.refreshToken,
+                ),
+            );
+        });
+
+        it('should throw an error if the user does not exist', async () => {
+            const signInRequest = new SignInRequest('', '');
+
+            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+                return Promise.resolve(null);
+            });
+
+            try {
+                await authController.signIn(signInRequest);
+            } catch (error) {
+                expect(error.status).toEqual(401);
+                expect(error.message).toEqual('Invalid credentials');
+                expect(error).toBeInstanceOf(InvalidCredentialsException);
+            }
+        });
+
+        it('should throw an error if invalid password was passed', async () => {
+            const signInRequest = new SignInRequest('test@mail.com', '1234567');
+
+            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+                return Promise.resolve(
+                    new UserEntity(
+                        signInRequest.email,
+                        'Test',
+                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                        null,
+                        1,
+                    ),
+                );
+            });
+
+            try {
+                await authController.signIn(signInRequest);
+            } catch (error) {
+                expect(error.status).toEqual(401);
+                expect(error.message).toEqual('Invalid credentials');
+                expect(error).toBeInstanceOf(InvalidCredentialsException);
             }
         });
     });
