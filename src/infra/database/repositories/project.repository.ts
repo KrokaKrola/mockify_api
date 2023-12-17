@@ -58,4 +58,12 @@ export class ProjectRepository {
             },
         });
     }
+
+    public async getProjectBuUuid(uuid: string): Promise<ProjectEntity> {
+        return this.prisma.project.findUnique({
+            where: {
+                projectId: uuid,
+            },
+        });
+    }
 }

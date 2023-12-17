@@ -51,8 +51,8 @@ describe('ProjectsController', () => {
         it('should return projects', async () => {
             jest.spyOn(projectsRepository, 'getUserProjects').mockImplementation(() => {
                 return Promise.resolve([
-                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date(), new Date()),
-                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date(), new Date()),
+                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date()),
+                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date()),
                 ]);
             });
 

@@ -13,12 +13,15 @@ export class ProjectEntity implements Project {
 
     public userId: number;
 
+    public projectId: string;
+
     constructor(
         id: number,
         name: string,
         userId: number,
         createdAt: Date,
         updatedAt: Date,
+        projectId?: string,
         deletedAt?: Date,
     ) {
         this.id = id;
@@ -27,5 +30,6 @@ export class ProjectEntity implements Project {
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
         this.userId = userId;
+        this.projectId = projectId;
     }
 }

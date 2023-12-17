@@ -3,6 +3,7 @@ import { AppConfigModule } from './infra/ioc/app-config/app-config.module';
 import { loggingMiddleware, PrismaModule, QueryInfo } from 'nestjs-prisma';
 import { AuthModule } from './infra/ioc/auth/auth.module';
 import { ProjectsModule } from './infra/ioc/projects/projects.module';
+import { UserApiModule } from './infra/ioc/user-api/user-api.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { ProjectsModule } from './infra/ioc/projects/projects.module';
         }),
         AuthModule,
         ProjectsModule,
+        UserApiModule,
     ],
 })
 export class AppModule {}
