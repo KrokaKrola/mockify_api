@@ -11,7 +11,7 @@ import { LogoutAction } from '../../../application/user/actions/logout.action';
 import { RefreshTokensAction } from '../../../application/user/actions/refresh-tokens.action';
 import { SignUpRequest } from '../../requests/auth/sign-up.request';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'nestjs-prisma';
+import { PrismaModule, PrismaService } from 'nestjs-prisma';
 import { SignUpResponse } from '../../responses/auth/sign-up.response';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { SignInRequest } from '../../requests/auth/sign-in.request';
@@ -32,7 +32,7 @@ describe('AuthController', () => {
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [JwtModule.register({})],
+            imports: [JwtModule.register({}), PrismaModule],
             controllers: [AuthController],
             providers: [
                 AccessTokenStrategy,
@@ -56,6 +56,7 @@ describe('AuthController', () => {
 
     afterEach(() => {
         jest.resetAllMocks();
+        prismaService.$disconnect();
     });
 
     afterAll(() => {
@@ -70,6 +71,10 @@ describe('AuthController', () => {
                 '12345678',
                 '12345678',
             );
+
+            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+                return Promise.resolve(null);
+            });
 
             jest.spyOn(userRepository, 'create').mockImplementation(() => {
                 return Promise.resolve(
