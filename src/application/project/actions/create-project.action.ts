@@ -16,10 +16,10 @@ export class CreateProjectAction {
         const userProjects = await this.projectRepository.getUserProjects(userId);
 
         if (userProjects.length >= 5) {
-            throw new MaximumResourceNumberException('User already has 3 projects', 'user');
+            throw new MaximumResourceNumberException('User already has 5 projects', 'user');
         }
 
-        const project = await this.projectRepository.findByNameAndUserId(dto.name, userId);
+        const project = userProjects.find((proj) => proj.name === dto.name);
 
         if (project) {
             throw new ResourceExistsException('Project already exists', 'name');

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateProjectRequest } from '../../../ui/requests/project/update-project.request';
 import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
 import { UpdateProjectResponse } from '../../../ui/responses/project/update-project.response';
-import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
+import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 
 @Injectable()
 export class UpdateProjectAction {
@@ -12,7 +12,7 @@ export class UpdateProjectAction {
         const project = await this.projectRepository.findById(id);
 
         if (!project) {
-            throw new ResourceExistsException('Project not found', 'id');
+            throw new ResourceNotFoundException('Project not found');
         }
 
         project.name = dto.name;

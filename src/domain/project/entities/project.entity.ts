@@ -19,7 +19,7 @@ export class ProjectEntity implements Project {
         userId: number,
         createdAt: Date,
         updatedAt: Date,
-        deletedAt: Date,
+        deletedAt?: Date,
     ) {
         this.id = id;
         this.name = name;
