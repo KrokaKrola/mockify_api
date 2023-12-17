@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
     HttpCode,
     HttpStatus,
     Param,
@@ -19,6 +20,8 @@ import { UpdateProjectRequest } from '../requests/project/update-project.request
 import { UpdateProjectResponse } from '../responses/project/update-project.response';
 import { UpdateProjectAction } from '../../application/project/actions/update-project.action';
 import { DeleteProjectAction } from '../../application/project/actions/delete-project.action';
+import { GetProjectsAction } from '../../application/project/actions/get-projects.action';
+import { GetProjectsResponse } from '../responses/project/get-projects.response';
 
 @Controller('projects')
 @UseGuards(AccessTokenGuard)
@@ -27,7 +30,13 @@ export class ProjectsController {
         private readonly createProjectAction: CreateProjectAction,
         private readonly updateProjectAction: UpdateProjectAction,
         private readonly deleteProjectAction: DeleteProjectAction,
+        private readonly getProjectsAction: GetProjectsAction,
     ) {}
+
+    @Get()
+    public async getProjects(@Req() request: Request): Promise<GetProjectsResponse> {
+        return this.getProjectsAction.execute(request.user.id);
+    }
 
     @Post()
     public async create(

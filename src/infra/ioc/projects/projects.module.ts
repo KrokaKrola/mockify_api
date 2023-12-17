@@ -4,10 +4,17 @@ import { ProjectRepository } from '../../database/repositories/project.repositor
 import { CreateProjectAction } from '../../../application/project/actions/create-project.action';
 import { UpdateProjectAction } from '../../../application/project/actions/update-project.action';
 import { DeleteProjectAction } from '../../../application/project/actions/delete-project.action';
+import { GetProjectsAction } from '../../../application/project/actions/get-projects.action';
 
 @Module({
     imports: [],
     controllers: [ProjectsController],
-    providers: [ProjectRepository, CreateProjectAction, UpdateProjectAction, DeleteProjectAction],
+    providers: [
+        ProjectRepository,
+        CreateProjectAction,
+        UpdateProjectAction,
+        DeleteProjectAction,
+        GetProjectsAction,
+    ],
 })
 export class ProjectsModule {}

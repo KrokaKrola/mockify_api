@@ -6,6 +6,14 @@ import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 export class ProjectRepository {
     constructor(private readonly prisma: PrismaService) {}
 
+    public async getUserProjects(userId: number): Promise<ProjectEntity[]> {
+        return this.prisma.project.findMany({
+            where: {
+                userId,
+            },
+        });
+    }
+
     public async findByNameAndUserId(name: string, userId: number): Promise<ProjectEntity> {
         return this.prisma.project.findFirst({
             where: {
