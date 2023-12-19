@@ -16,7 +16,7 @@ async function bootstrap(): Promise<INestApplication> {
     const configService = app.get(ConfigService);
 
     Logger.log(
-        `⚪️Application is running in mode: ${chalk
+        `⚪️ Application is running in mode: ${chalk
             .hex('#e3fc17')
             .bold(configService.get('APP_ENV'))}`,
         'Bootstrap',
@@ -33,14 +33,12 @@ async function bootstrap(): Promise<INestApplication> {
 
     prismaService.$on('query', (e) => {
         Logger.debug(
-            `🟣${chalk.hex('#e3fc17').bold('Query')}: ${chalk.hex('#28880a')(e.query)} ╏ ${chalk
+            `🟣 ${chalk.hex('#e3fc17').bold('Query')}: ${chalk.hex('#28880a')(e.query)} ╏ ${chalk
                 .hex('#e3fc17')
                 .bold('Params')}: ${chalk.hex('#28880a')(e.params)}`,
             'PrismaQuery',
         );
     });
-
-    console.log('123213');
 
     await app.listen(configService.get('APP_PORT') || 3000);
 
@@ -52,7 +50,7 @@ bootstrap()
         const configService = app.get(ConfigService);
 
         Logger.log(
-            `⚪️Application is running on: http://${configService.get(
+            `⚪ Application is running on: http://${configService.get(
                 'APP_HOST',
             )}:${configService.get('APP_PORT')}`,
             'Bootstrap',

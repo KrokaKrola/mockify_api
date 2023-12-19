@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
 
 @Injectable()
 export class ProjectRepository {
     constructor(private readonly prisma: PrismaService) {}
+
+    public async getUserProjects(userId: number): Promise<ProjectEntity[]> {
+        return this.prisma.project.findMany({
+            where: {
+                userId,
+            },
+        });
+    }
 
     public async findByNameAndUserId(name: string, userId: number): Promise<ProjectEntity> {
         return this.prisma.project.findFirst({
@@ -32,6 +41,19 @@ export class ProjectRepository {
         });
     }
 
+    public async findByIdWithEntries(
+        id: number,
+    ): Promise<ProjectEntity & { entry: ProjectEntryEntity[] }> {
+        return this.prisma.project.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                entry: true,
+            },
+        });
+    }
+
     public async update(project: ProjectEntity): Promise<ProjectEntity> {
         return this.prisma.project.update({
             where: {
@@ -47,6 +69,14 @@ export class ProjectRepository {
         await this.prisma.project.delete({
             where: {
                 id,
+            },
+        });
+    }
+
+    public async findProjectByUuid(uuid: string): Promise<ProjectEntity> {
+        return this.prisma.project.findUnique({
+            where: {
+                projectId: uuid,
             },
         });
     }

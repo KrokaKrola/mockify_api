@@ -16,7 +16,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
   refreshToken String?   @map("refresh_token") @db.VarChar(255)
-  Project      Project[]
+  project      Project[]
 
   @@map("users")
 }
@@ -24,11 +24,54 @@ model User {
 model Project {
   id        Int       @id @default(autoincrement())
   name      String    @db.VarChar(255)
+  projectId String    @unique @default(uuid()) @map("project_id") @db.Uuid
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
   userId    Int       @map("user_id")
-  User      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  entry     Entry[]
 
   @@map("projects")
+}
+
+model Entry {
+  id             Int              @id @default(autoincrement())
+  name           String           @db.VarChar(255)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  deletedAt      DateTime?        @map("deleted_at")
+  projectId      Int              @map("project_id")
+  project        Project          @relation(fields: [projectId], references: [id])
+  entryData      EntryData[]
+  entryRelations EntryRelations[]
+  entryShape     EntryShape[]
+
+  @@map("entries")
+}
+
+model EntryShape {
+  id        Int      @id @default(autoincrement())
+  shape     Json     @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  entryId   Int      @map("entry_id")
+  entry     Entry    @relation(fields: [entryId], references: [id])
+}
+
+model EntryRelations {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  entryId   Int      @map("entry_id")
+  entry     Entry    @relation(fields: [entryId], references: [id])
+}
+
+model EntryData {
+  id        Int      @id @default(autoincrement())
+  data      Json     @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  entryId   Int      @map("entry_id")
+  entry     Entry    @relation(fields: [entryId], references: [id])
 }

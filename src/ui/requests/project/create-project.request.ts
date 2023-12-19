@@ -6,4 +6,8 @@ export class CreateProjectRequest {
     @MinLength(2)
     @IsAscii()
     public name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
 }
