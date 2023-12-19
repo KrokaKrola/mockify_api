@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
-import { Prisma } from '@prisma/client';
+import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
 
 @Injectable()
 export class ProjectRepository {
@@ -33,13 +33,24 @@ export class ProjectRepository {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    public async findById(id: number, include?: Prisma.ProjectInclude) {
+    public async findById(id: number): Promise<ProjectEntity> {
         return this.prisma.project.findUnique({
             where: {
                 id,
             },
-            include,
+        });
+    }
+
+    public async findByIdWithEntries(
+        id: number,
+    ): Promise<ProjectEntity & { entry: ProjectEntryEntity[] }> {
+        return this.prisma.project.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                entry: true,
+            },
         });
     }
 

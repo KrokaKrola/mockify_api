@@ -14,21 +14,34 @@ import { CreateProjectResponse } from '../../responses/project/create-project.re
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
+import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
+import { GetProjectEntriesAction } from '../../../application/project/actions/get-project-entries.action';
+import { UpdateProjectEntryAction } from '../../../application/project/actions/update-project-entry.action';
+import { DeleteProjectEntryAction } from '../../../application/project/actions/delete-project-entry.action';
+import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import { CreateProjectEntryResponse } from '../../responses/project/create-project-entry.response';
 
 describe('ProjectsController', () => {
     let controller: ProjectsController;
     let prismaService: PrismaService;
     let projectsRepository: ProjectRepository;
+    let projectEntryRepository: ProjectEntryRepository;
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
             controllers: [ProjectsController],
             providers: [
                 ProjectRepository,
+                ProjectEntryRepository,
                 CreateProjectAction,
                 UpdateProjectAction,
                 DeleteProjectAction,
                 GetProjectsAction,
+                CreateProjectEntryAction,
+                GetProjectEntriesAction,
+                UpdateProjectEntryAction,
+                DeleteProjectEntryAction,
                 PrismaService,
                 ConfigService,
             ],
@@ -37,14 +50,12 @@ describe('ProjectsController', () => {
         controller = moduleRef.get<ProjectsController>(ProjectsController);
         prismaService = moduleRef.get<PrismaService>(PrismaService);
         projectsRepository = moduleRef.get<ProjectRepository>(ProjectRepository);
+        projectEntryRepository = moduleRef.get<ProjectEntryRepository>(ProjectEntryRepository);
     });
 
     afterEach(() => {
+        prismaService?.$disconnect();
         jest.resetAllMocks();
-    });
-
-    afterAll(() => {
-        prismaService.$disconnect();
     });
 
     describe('getProjects', () => {
@@ -219,6 +230,355 @@ describe('ProjectsController', () => {
             } catch (error) {
                 expect(error.status).toEqual(404);
                 expect(error.message).toEqual('Project not found');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+    });
+
+    describe('createEntry', () => {
+        it('should create an entry', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [],
+                });
+            });
+
+            const newEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectEntryRepository, 'create').mockImplementation(() => {
+                return Promise.resolve(newEntry);
+            });
+
+            const dto = { name: newEntry.name };
+
+            const response = await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+
+            expect(response).toEqual(new CreateProjectEntryResponse(newEntry.id, newEntry.name));
+        });
+
+        it('should throw an error if project does not exist', async () => {
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            const dto = { name: 'Entry 1' };
+
+            try {
+                await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if user does not own the project', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [],
+                });
+            });
+
+            const dto = { name: 'Entry 1' };
+
+            try {
+                await controller.createEntry(dto, 1, { user: { id: 2 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if project already has 20 entries', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: new Array(20).map(
+                        (_, i) => new ProjectEntryEntity(i + 1, `Entry ${i + 1}`, project.id),
+                    ),
+                });
+            });
+
+            const dto = { name: 'Entry 21' };
+
+            try {
+                await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(409);
+                expect(error.message).toEqual('Maximum number of entries reached');
+                expect(error).toBeInstanceOf(MaximumResourceNumberException);
+            }
+        });
+
+        it('should throw an error if entry already exists', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                });
+            });
+
+            const dto = { name: 'Entry 1' };
+
+            try {
+                await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(409);
+                expect(error.message).toEqual('Entry with this name already exists');
+                expect(error).toBeInstanceOf(ResourceExistsException);
+            }
+        });
+    });
+
+    describe('getEntries', () => {
+        it('should return entries', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                });
+            });
+
+            const response = await controller.getEntries(1, { user: { id: 1 } } as Request);
+
+            expect(response).toEqual({
+                entries: [{ id: 1, name: 'Entry 1' }],
+            });
+        });
+
+        it('should throw an error if project does not exist', async () => {
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            try {
+                await controller.getEntries(1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if user does not own the project', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                });
+            });
+
+            try {
+                await controller.getEntries(1, { user: { id: 2 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+    });
+
+    describe('updateEntry', () => {
+        it('should update an entry', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [entry],
+                });
+            });
+
+            const updatedEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
+                return Promise.resolve(updatedEntry);
+            });
+
+            const dto = { name: updatedEntry.name };
+
+            const response = await controller.updateEntry(dto, 1, 1, {
+                user: { id: 1 },
+            } as Request);
+
+            expect(response).toEqual({
+                id: updatedEntry.id,
+                name: updatedEntry.name,
+            });
+        });
+
+        it('should throw an error if project does not exist', async () => {
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            const dto = { name: 'Entry 1' };
+
+            try {
+                await controller.updateEntry(dto, 1, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if user does not own the project', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [entry],
+                });
+            });
+
+            const updatedEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
+                return Promise.resolve(updatedEntry);
+            });
+
+            const dto = { name: updatedEntry.name };
+
+            try {
+                await controller.updateEntry(dto, 1, 1, {
+                    user: { id: 2 },
+                } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if entry does not exist', async () => {
+            jest.spyOn(projectEntryRepository, 'findById').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            const dto = { name: 'Entry 1' };
+
+            try {
+                await controller.updateEntry(dto, 1, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if entry already exists', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            const entries = [
+                new ProjectEntryEntity(1, 'Entry 1', project.id),
+                new ProjectEntryEntity(2, 'Entry 2', 2),
+            ];
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: entries,
+                });
+            });
+
+            const updatedEntry = new ProjectEntryEntity(1, 'Entry 2', project.id);
+
+            jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
+                return Promise.resolve(updatedEntry);
+            });
+
+            const dto = { name: updatedEntry.name };
+
+            try {
+                await controller.updateEntry(dto, 1, 1, {
+                    user: { id: 1 },
+                } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(409);
+                expect(error.message).toEqual('Entry with this name already exists');
+                expect(error).toBeInstanceOf(ResourceExistsException);
+            }
+        });
+    });
+
+    describe('deleteEntry', () => {
+        it('should delete an entry', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [entry],
+                });
+            });
+
+            jest.spyOn(projectEntryRepository, 'delete').mockImplementation(() => {
+                return Promise.resolve();
+            });
+
+            await controller.deleteEntry(1, 1, { user: { id: 1 } } as Request);
+
+            expect(projectEntryRepository.delete).toHaveBeenCalledWith(entry.id);
+        });
+
+        it('should throw an error if project does not exist', async () => {
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve(undefined);
+            });
+
+            try {
+                await controller.deleteEntry(1, 1, { user: { id: 1 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error).toBeInstanceOf(ResourceNotFoundException);
+            }
+        });
+
+        it('should throw an error if user does not own the project', async () => {
+            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+
+            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+
+            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
+                return Promise.resolve({
+                    ...project,
+                    entry: [entry],
+                });
+            });
+
+            jest.spyOn(projectEntryRepository, 'delete').mockImplementation(() => {
+                return Promise.resolve();
+            });
+
+            try {
+                await controller.deleteEntry(1, 1, { user: { id: 2 } } as Request);
+            } catch (error) {
+                expect(error.status).toEqual(404);
+                expect(error.message).toEqual('Project with this id does not exist');
                 expect(error).toBeInstanceOf(ResourceNotFoundException);
             }
         });

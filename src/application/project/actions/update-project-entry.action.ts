@@ -4,6 +4,7 @@ import { UpdateProjectEntryResponse } from '../../../ui/responses/project/update
 import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
 import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 
 @Injectable()
 export class UpdateProjectEntryAction {
@@ -18,7 +19,7 @@ export class UpdateProjectEntryAction {
         entryId: number,
         userId: number,
     ): Promise<UpdateProjectEntryResponse> {
-        const project = await this.projectRepository.findById(projectId, { entry: true });
+        const project = await this.projectRepository.findByIdWithEntries(projectId);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -32,6 +33,12 @@ export class UpdateProjectEntryAction {
 
         if (!entry) {
             throw new ResourceNotFoundException('Entry with this id does not exist');
+        }
+
+        const existingEntry = project.entry.find((e) => e.name === dto.name && e.name !== dto.name);
+
+        if (existingEntry) {
+            throw new ResourceExistsException('Entry with this name already exists');
         }
 
         entry.name = dto.name;

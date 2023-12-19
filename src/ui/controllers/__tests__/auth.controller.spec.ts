@@ -56,11 +56,7 @@ describe('AuthController', () => {
 
     afterEach(() => {
         jest.resetAllMocks();
-        prismaService.$disconnect();
-    });
-
-    afterAll(() => {
-        prismaService.$disconnect();
+        prismaService?.$disconnect();
     });
 
     describe('signUp', () => {
