@@ -16,7 +16,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
   refreshToken String?   @map("refresh_token") @db.VarChar(255)
-  Project      Project[]
+  project      Project[]
 
   @@map("users")
 }
@@ -29,8 +29,8 @@ model Project {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
   userId    Int       @map("user_id")
-  User      User      @relation(fields: [userId], references: [id])
-  Entry     Entry[]
+  user      User      @relation(fields: [userId], references: [id])
+  entry     Entry[]
 
   @@map("projects")
 }
@@ -42,10 +42,10 @@ model Entry {
   updatedAt      DateTime         @updatedAt @map("updated_at")
   deletedAt      DateTime?        @map("deleted_at")
   projectId      Int              @map("project_id")
-  Project        Project          @relation(fields: [projectId], references: [id])
-  EntryData      EntryData[]
-  EntryRelations EntryRelations[]
-  EntryShape     EntryShape[]
+  project        Project          @relation(fields: [projectId], references: [id])
+  entryData      EntryData[]
+  entryRelations EntryRelations[]
+  entryShape     EntryShape[]
 
   @@map("entries")
 }
@@ -56,7 +56,7 @@ model EntryShape {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   entryId   Int      @map("entry_id")
-  Entry     Entry    @relation(fields: [entryId], references: [id])
+  entry     Entry    @relation(fields: [entryId], references: [id])
 }
 
 model EntryRelations {
@@ -64,7 +64,7 @@ model EntryRelations {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   entryId   Int      @map("entry_id")
-  Entry     Entry    @relation(fields: [entryId], references: [id])
+  entry     Entry    @relation(fields: [entryId], references: [id])
 }
 
 model EntryData {
@@ -73,5 +73,5 @@ model EntryData {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   entryId   Int      @map("entry_id")
-  Entry     Entry    @relation(fields: [entryId], references: [id])
+  entry     Entry    @relation(fields: [entryId], references: [id])
 }
