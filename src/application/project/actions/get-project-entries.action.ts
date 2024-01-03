@@ -18,6 +18,6 @@ export class GetProjectEntriesAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        return new GetProjectEntriesResponse(project.entry);
+        return new GetProjectEntriesResponse(project.entries);
     }
 }

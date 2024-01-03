@@ -43,13 +43,13 @@ export class ProjectRepository {
 
     public async findByIdWithEntries(
         id: number,
-    ): Promise<ProjectEntity & { entry: ProjectEntryEntity[] }> {
+    ): Promise<ProjectEntity & { entries: ProjectEntryEntity[] }> {
         return this.prisma.project.findUnique({
             where: {
                 id,
             },
             include: {
-                entry: true,
+                entries: true,
             },
         });
     }
@@ -69,14 +69,6 @@ export class ProjectRepository {
         await this.prisma.project.delete({
             where: {
                 id,
-            },
-        });
-    }
-
-    public async findProjectByUuid(uuid: string): Promise<ProjectEntity> {
-        return this.prisma.project.findUnique({
-            where: {
-                projectId: uuid,
             },
         });
     }

@@ -16,7 +16,7 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
   refreshToken String?   @map("refresh_token") @db.VarChar(255)
-  project      Project[]
+  projects     Project[]
 
   @@map("users")
 }
@@ -30,7 +30,7 @@ model Project {
   deletedAt DateTime? @map("deleted_at")
   userId    Int       @map("user_id")
   user      User      @relation(fields: [userId], references: [id])
-  entry     Entry[]
+  entries   Entry[]
 
   @@map("projects")
 }

@@ -1,4 +1,5 @@
-import { Project } from '@prisma/client';
+import { type Project } from '@prisma/client';
+import { ProjectEntryEntity } from './project-entry.entity';
 
 export class ProjectEntity implements Project {
     public id: number;
@@ -15,6 +16,8 @@ export class ProjectEntity implements Project {
 
     public projectId: string;
 
+    public entries?: ProjectEntryEntity[];
+
     constructor(
         id: number,
         name: string,
@@ -23,6 +26,7 @@ export class ProjectEntity implements Project {
         updatedAt: Date,
         projectId?: string,
         deletedAt?: Date,
+        entries?: ProjectEntryEntity[],
     ) {
         this.id = id;
         this.name = name;
@@ -31,5 +35,6 @@ export class ProjectEntity implements Project {
         this.deletedAt = deletedAt;
         this.userId = userId;
         this.projectId = projectId;
+        this.entries = entries;
     }
 }

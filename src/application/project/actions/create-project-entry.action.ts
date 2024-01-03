@@ -29,11 +29,11 @@ export class CreateProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        if (project.entry.length >= 20) {
+        if (project.entries.length >= 20) {
             throw new MaximumResourceNumberException('Maximum number of entries reached');
         }
 
-        const entry = project.entry.find((e) => e.name === dto.name);
+        const entry = project.entries.find((e) => e.name === dto.name);
         if (entry) {
             throw new ResourceExistsException('Entry with this name already exists');
         }

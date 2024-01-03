@@ -7,8 +7,6 @@ export class UserRepository {
     constructor(private readonly prisma: PrismaService) {}
 
     public async findById(id: number): Promise<UserEntity> {
-        console.log(id);
-
         return this.prisma.user.findFirst({
             where: {
                 id,
@@ -34,7 +32,7 @@ export class UserRepository {
         });
     }
 
-    public async update(user: Partial<UserEntity>): Promise<UserEntity> {
+    public async update(user: Partial<Omit<UserEntity, 'projects'>>): Promise<UserEntity> {
         return this.prisma.user.update({
             where: {
                 id: user.id,

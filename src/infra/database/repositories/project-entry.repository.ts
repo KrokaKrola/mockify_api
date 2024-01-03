@@ -4,22 +4,6 @@ import { ProjectEntryEntity } from '../../../domain/project/entities/project-ent
 export class ProjectEntryRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async findUserEntityByName(name: string): Promise<ProjectEntryEntity> {
-        return this.prisma.entry.findFirst({
-            where: {
-                name: name,
-            },
-        });
-    }
-
-    public async findProjectEntries(projectId: number): Promise<ProjectEntryEntity[]> {
-        return this.prisma.entry.findMany({
-            where: {
-                projectId,
-            },
-        });
-    }
-
     public async create(name: string, projectId: number): Promise<ProjectEntryEntity> {
         return this.prisma.entry.create({
             data: {

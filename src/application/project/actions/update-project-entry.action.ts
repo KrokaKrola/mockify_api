@@ -29,21 +29,23 @@ export class UpdateProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        const entry = project.entry.find((projEntry) => projEntry.id === entryId);
+        const entity = project.entries.find((projEntry) => projEntry.id === entryId);
 
-        if (!entry) {
+        if (!entity) {
             throw new ResourceNotFoundException('Entry with this id does not exist');
         }
 
-        const existingEntry = project.entry.find((e) => e.name === dto.name && e.name !== dto.name);
+        const existingEntry = project.entries.find(
+            (e) => e.name === dto.name && e.name !== dto.name,
+        );
 
         if (existingEntry) {
             throw new ResourceExistsException('Entry with this name already exists');
         }
 
-        entry.name = dto.name;
+        entity.name = dto.name;
 
-        const updatedEntry = await this.projectEntryRepository.update(entry);
+        const updatedEntry = await this.projectEntryRepository.update(entity);
 
         return new UpdateProjectEntryResponse(updatedEntry.id, updatedEntry.name);
     }

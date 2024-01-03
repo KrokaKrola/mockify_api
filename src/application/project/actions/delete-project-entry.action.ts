@@ -21,7 +21,7 @@ export class DeleteProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        const entry = project.entry.find((e) => e.id === entryId);
+        const entry = project.entries.find((e) => e.id === entryId);
 
         if (!entry) {
             throw new ResourceNotFoundException('Entry with this id does not exist');

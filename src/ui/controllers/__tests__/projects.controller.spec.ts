@@ -242,7 +242,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [],
+                    entries: [],
                 });
             });
 
@@ -281,7 +281,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [],
+                    entries: [],
                 });
             });
 
@@ -302,7 +302,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: new Array(20).map(
+                    entries: new Array(20).map(
                         (_, i) => new ProjectEntryEntity(i + 1, `Entry ${i + 1}`, project.id),
                     ),
                 });
@@ -325,7 +325,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
                 });
             });
 
@@ -348,7 +348,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
                 });
             });
 
@@ -379,7 +379,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
+                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
                 });
             });
 
@@ -402,7 +402,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [entry],
+                    entries: [entry],
                 });
             });
 
@@ -448,7 +448,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [entry],
+                    entries: [entry],
                 });
             });
 
@@ -498,7 +498,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: entries,
+                    entries: entries,
                 });
             });
 
@@ -531,7 +531,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [entry],
+                    entries: [entry],
                 });
             });
 
@@ -566,7 +566,7 @@ describe('ProjectsController', () => {
             jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
                 return Promise.resolve({
                     ...project,
-                    entry: [entry],
+                    entries: [entry],
                 });
             });
 
