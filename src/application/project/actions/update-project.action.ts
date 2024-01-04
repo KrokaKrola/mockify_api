@@ -9,7 +9,7 @@ export class UpdateProjectAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(dto: UpdateProjectRequest, id: number): Promise<UpdateProjectResponse> {
-        const project = await this.projectRepository.findOne({ where: { id } });
+        const project = await this.projectRepository.findProjectById(id);
 
         if (!project) {
             throw new ResourceNotFoundException('Project not found');

@@ -11,10 +11,7 @@ export class DeleteProjectEntryAction {
     ) {}
 
     public async execute(projectId: number, entryId: number, userId: number): Promise<void> {
-        const project = await this.projectRepository.findOne({
-            where: { id: projectId },
-            relations: ['projectEntries'],
-        });
+        const project = await this.projectRepository.findProjectById(projectId, ['projectEntries']);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -25,7 +22,6 @@ export class DeleteProjectEntryAction {
         }
 
         const entry = project.projectEntries.find((e) => e.id === entryId);
-
         if (!entry) {
             throw new ResourceNotFoundException('Entry with this id does not exist');
         }

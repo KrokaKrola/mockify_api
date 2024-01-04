@@ -13,7 +13,7 @@ export class SignInAction {
     ) {}
 
     public async execute(dto: SignInRequest): Promise<SignInResponse> {
-        const user = await this.userRepository.findOne({ where: { email: dto.email } });
+        const user = await this.userRepository.findOneByEmail(dto.email);
 
         if (!user) {
             throw new InvalidCredentialsException();
@@ -29,7 +29,6 @@ export class SignInAction {
         }
 
         const tokens = await this.authService.getTokens(user.id, user.email);
-
         const hashedRefreshToken = await this.authService.hashValue(tokens.refreshToken);
 
         await this.userRepository.update({ id: user.id }, { refreshToken: hashedRefreshToken });

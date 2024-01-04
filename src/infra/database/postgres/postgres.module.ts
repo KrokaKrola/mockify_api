@@ -26,7 +26,6 @@ export const PostgresModule = TypeOrmModule.forRootAsync({
     inject: [ConfigService],
     dataSourceFactory: async (options) => {
         const dataSource = new DataSource(options);
-
         await dataSource.initialize();
 
         return dataSource;

@@ -14,7 +14,7 @@ export class RefreshTokensAction {
 
     public async execute(req: Request): Promise<RefreshTokensResponse> {
         const { id, refreshToken, email } = req.user;
-        const user = await this.userRepository.findOne({ where: { id } });
+        const user = await this.userRepository.findById(id);
 
         if (!user) {
             throw new NotFoundException('User not found', 'user');
@@ -34,7 +34,6 @@ export class RefreshTokensAction {
         }
 
         const tokens = await this.authService.getTokens(id, email);
-
         const hashedRefreshToken = await this.authService.hashValue(tokens.refreshToken);
 
         await this.userRepository.update({ id }, { refreshToken: hashedRefreshToken });

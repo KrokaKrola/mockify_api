@@ -8,11 +8,8 @@ export class GetProjectEntriesAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(projectId: number, userId: number): Promise<GetProjectEntriesResponse> {
-        // TODO: change to ProjectEntryRepository
-        const project = await this.projectRepository.findOne({
-            where: { id: projectId },
-            relations: ['projectEntries'],
-        });
+        // TODO: rewrite with project-entry-repository
+        const project = await this.projectRepository.findProjectById(projectId, ['projectEntries']);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');

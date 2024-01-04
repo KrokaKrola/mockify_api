@@ -4,6 +4,7 @@ import { CreateProjectRequest } from '../../../ui/requests/project/create-projec
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 
 @Injectable()
 export class CreateProjectAction {
@@ -13,7 +14,7 @@ export class CreateProjectAction {
         dto: CreateProjectRequest,
         userId: number,
     ): Promise<CreateProjectResponse> {
-        const userProjects = await this.projectRepository.find({ where: { userId } });
+        const userProjects = await this.projectRepository.findProjectsByUserId(userId);
 
         if (userProjects.length >= 5) {
             throw new MaximumResourceNumberException('User already has 5 projects', 'user');
@@ -25,10 +26,9 @@ export class CreateProjectAction {
             throw new ResourceExistsException('Project already exists', 'name');
         }
 
-        const createdProject = this.projectRepository.create({ name: dto.name, userId });
+        const createdProject = new ProjectEntity(dto.name, userId);
+        const result = await this.projectRepository.save(createdProject);
 
-        await this.projectRepository.save(createdProject);
-
-        return new CreateProjectResponse(createdProject.id, createdProject.name);
+        return new CreateProjectResponse(result.id, createdProject.name);
     }
 }

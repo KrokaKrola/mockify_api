@@ -20,10 +20,7 @@ export class CreateProjectEntryAction {
         userId: number,
         projectId: number,
     ): Promise<CreateProjectEntryResponse> {
-        const project = await this.projectRepository.findOne({
-            where: { id: projectId },
-            relations: ['projectEntries'],
-        });
+        const project = await this.projectRepository.findProjectById(projectId, ['projectEntries']);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -43,11 +40,8 @@ export class CreateProjectEntryAction {
         }
 
         const newEntry = new ProjectEntryEntity(dto.name, projectId);
+        const result = await this.entryRepository.save(newEntry);
 
-        const createdEntry = this.entryRepository.create(newEntry);
-
-        await this.entryRepository.save(createdEntry);
-
-        return new CreateProjectEntryResponse(createdEntry.id, createdEntry.name);
+        return new CreateProjectEntryResponse(result.id, newEntry.name);
     }
 }

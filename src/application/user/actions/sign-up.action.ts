@@ -14,7 +14,7 @@ export class SignUpAction {
     ) {}
 
     public async execute(dto: SignUpRequest): Promise<SignUpResponse> {
-        const userExists = await this.userRepository.exists({ where: { email: dto.email } });
+        const userExists = await this.userRepository.existsByEmail(dto.email);
 
         if (userExists) {
             throw new ResourceExistsException('User already exists');
@@ -22,14 +22,10 @@ export class SignUpAction {
 
         const passwordHash = await this.authService.hashValue(dto.password);
 
-        const userEntity = new UserEntity(dto.email, dto.name, passwordHash);
-
-        const user = this.userRepository.create(userEntity);
-
-        await this.userRepository.save(user);
+        let user = new UserEntity(dto.email, dto.name, passwordHash);
+        user = await this.userRepository.save(user);
 
         const tokens = await this.authService.getTokens(user.id, dto.email);
-
         const hashedRefreshToken = await this.authService.hashValue(tokens.refreshToken);
 
         await this.userRepository.update({ id: user.id }, { refreshToken: hashedRefreshToken });

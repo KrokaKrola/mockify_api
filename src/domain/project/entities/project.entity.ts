@@ -17,7 +17,9 @@ export class ProjectEntity {
 
     public projectEntries: ProjectEntryEntity[];
 
-    constructor(name: string) {
+    constructor(name: string, userId?: number, id?: number) {
         this.name = name;
+        this.userId = userId;
+        this.id = id;
     }
 }

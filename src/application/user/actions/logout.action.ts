@@ -7,7 +7,7 @@ export class LogoutAction {
     constructor(private readonly userRepository: UserRepository) {}
 
     public async execute(userId: number): Promise<void> {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await this.userRepository.findById(userId);
 
         if (!user) {
             throw new ResourceNotFoundException('User not found');

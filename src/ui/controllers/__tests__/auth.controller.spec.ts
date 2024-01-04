@@ -72,25 +72,20 @@ describe('AuthController', () => {
                 '12345678',
             );
 
-            jest.spyOn(userRepository, 'exists').mockImplementation(() => {
+            jest.spyOn(userRepository, 'existsByEmail').mockImplementation(() => {
                 return Promise.resolve(null);
             });
 
-            jest.spyOn(userRepository, 'create').mockImplementation(() => {
+            jest.spyOn(userRepository, 'save').mockImplementation(() => {
                 const user = new UserEntity(
                     signUpRequest.email,
                     signUpRequest.name,
                     '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                     null,
+                    1,
                 );
 
-                user.id = 1;
-
-                return user;
-            });
-
-            jest.spyOn(userRepository, 'save').mockImplementation(() => {
-                return Promise.resolve(undefined);
+                return Promise.resolve(user);
             });
 
             const tokens = await authService.getTokens(1, signUpRequest.email);
@@ -130,7 +125,7 @@ describe('AuthController', () => {
                 '12345678',
             );
 
-            jest.spyOn(userRepository, 'exists').mockImplementation(() => {
+            jest.spyOn(userRepository, 'existsByEmail').mockImplementation(() => {
                 return Promise.resolve(true);
             });
 
@@ -148,15 +143,14 @@ describe('AuthController', () => {
         it('should return a valid SignInResponse', async () => {
             const signInRequest = new SignInRequest('test@mail.com', '12345678');
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
                 const user = new UserEntity(
                     signInRequest.email,
                     'Test',
                     '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                     null,
+                    1,
                 );
-
-                user.id = 1;
 
                 return Promise.resolve(user);
             });
@@ -193,7 +187,7 @@ describe('AuthController', () => {
         it('should throw an error if the user does not exist', async () => {
             const signInRequest = new SignInRequest('', '');
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
                 return Promise.resolve(null);
             });
 
@@ -209,7 +203,7 @@ describe('AuthController', () => {
         it('should throw an error if invalid password was passed', async () => {
             const signInRequest = new SignInRequest('test@mail.com', '1234567');
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
                 return Promise.resolve(
                     new UserEntity(
                         signInRequest.email,
@@ -240,13 +234,14 @@ describe('AuthController', () => {
                 return Promise.resolve(undefined);
             });
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(
                     new UserEntity(
                         'test@mail.com',
                         'Test',
                         '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                         null,
+                        1,
                     ),
                 );
             });
@@ -262,7 +257,7 @@ describe('AuthController', () => {
                 user: { id: 1, email: 'test@mail.com' },
             } as Request;
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 return null;
             });
 
@@ -282,15 +277,14 @@ describe('AuthController', () => {
                 user: { id: 1, email: 'test@mail.com', refreshToken: 'some refresh token' },
             } as Request;
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 const user = new UserEntity(
                     request.user.email,
                     'Test',
                     '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                     'b2d2e889a08f165ccc4990dc29ccc2193cb47f7761e96080dea3cb94decda87872a83dd432b0261d19c66aaf52893367b26ac29d8b1f3d12d458607414245d8f326d6b7ca878ad206e42d8522e06c9ddb9db07773b58e95303d8821f64a4ea41d2ab171d862e6f58a0057cfe8515a4df852ce504b2f0e985bfd531ea70cc3a',
+                    1,
                 );
-
-                user.id = 1;
 
                 return Promise.resolve(user);
             });
@@ -325,7 +319,7 @@ describe('AuthController', () => {
                 user: { id: 1, email: 'test@mail.com', refreshToken: 'some refresh token' },
             } as Request;
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 return null;
             });
 
@@ -343,13 +337,14 @@ describe('AuthController', () => {
                 user: { id: 1, email: 'test@mail.com', refreshToken: 'some refresh token' },
             } as Request;
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(
                     new UserEntity(
                         request.user.email,
                         'Test',
                         '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                         null,
+                        1,
                     ),
                 );
             });
@@ -368,13 +363,14 @@ describe('AuthController', () => {
                 user: { id: 1, email: 'test@mail.com', refreshToken: 'some changed refresh token' },
             } as Request;
 
-            jest.spyOn(userRepository, 'findOne').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(
                     new UserEntity(
                         request.user.email,
                         'Test',
                         '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                         'b2d2e889a08f165ccc4990dc29ccc2193cb47f7761e96080dea3cb94decda87872a83dd432b0261d19c66aaf52893367b26ac29d8b1f3d12d458607414245d8f326d6b7ca878ad206e42d8522e06c9ddb9db07773b58e95303d8821f64a4ea41d2ab171d862e6f58a0057cfe8515a4df852ce504b2f0e985bfd531ea70cc3a',
+                        1,
                     ),
                 );
             });

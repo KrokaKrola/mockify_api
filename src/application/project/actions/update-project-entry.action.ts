@@ -19,10 +19,7 @@ export class UpdateProjectEntryAction {
         entryId: number,
         userId: number,
     ): Promise<UpdateProjectEntryResponse> {
-        const project = await this.projectRepository.findOne({
-            where: { id: projectId },
-            relations: ['projectEntries'],
-        });
+        const project = await this.projectRepository.findProjectById(projectId, ['projectEntries']);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');

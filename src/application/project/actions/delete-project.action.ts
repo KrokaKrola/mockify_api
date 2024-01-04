@@ -7,7 +7,7 @@ export class DeleteProjectAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(id: number): Promise<void> {
-        const project = await this.projectRepository.findOne({ where: { id } });
+        const project = await this.projectRepository.findProjectById(id);
 
         if (!project) {
             throw new ResourceNotFoundException('Project not found');

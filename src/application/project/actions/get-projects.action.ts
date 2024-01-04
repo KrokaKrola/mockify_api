@@ -7,9 +7,7 @@ export class GetProjectsAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(userId: number): Promise<GetProjectsResponse> {
-        const projects = await this.projectRepository.find({
-            where: { userId },
-        });
+        const projects = await this.projectRepository.findProjectsByUserId(userId);
 
         return new GetProjectsResponse(projects);
     }

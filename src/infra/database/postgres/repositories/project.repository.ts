@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectMapper } from '../mappers/project.mapper';
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
@@ -11,5 +11,16 @@ export class ProjectRepository extends Repository<ProjectEntity> {
         repository: Repository<ProjectEntity>,
     ) {
         super(repository.target, repository.manager, repository.queryRunner);
+    }
+
+    public async findProjectsByUserId(userId: number): Promise<ProjectEntity[]> {
+        return this.find({ where: { userId } });
+    }
+
+    public async findProjectById(
+        id: number,
+        relations?: FindOneOptions<ProjectEntity>['relations'],
+    ): Promise<ProjectEntity> {
+        return this.findOne({ where: { id }, relations });
     }
 }
