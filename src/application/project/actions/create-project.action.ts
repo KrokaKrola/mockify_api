@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProjectResponse } from '../../../ui/responses/project/create-project.response';
-import { CreateProjectRequest } from '../../../ui/requests/project/create-project.request';
-import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
-import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
-import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
+import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
+import { CreateProjectRequest } from '../../../ui/requests/project/create-project.request';
+import { CreateProjectResponse } from '../../../ui/responses/project/create-project.response';
 
 @Injectable()
 export class CreateProjectAction {

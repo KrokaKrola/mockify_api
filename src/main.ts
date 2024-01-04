@@ -1,11 +1,12 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
-import * as chalk from 'chalk';
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import * as bodyParser from 'body-parser';
+import * as chalk from 'chalk';
+import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+
+import { AppModule } from './app.module';
 import { LoggingInterceptor } from './infra/rest/interceptors/logging.interceptor';
 import { ValidationTransformPipe } from './infra/rest/pipes/validation-transform.pipe';
 

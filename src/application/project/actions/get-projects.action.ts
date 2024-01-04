@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { GetProjectsResponse } from '../../../ui/responses/project/get-projects.response';
+
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { GetProjectsResponse } from '../../../ui/responses/project/get-projects.response';
 
 @Injectable()
 export class GetProjectsAction {

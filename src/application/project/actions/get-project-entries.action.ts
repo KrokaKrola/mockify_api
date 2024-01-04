@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { GetProjectEntriesResponse } from '../../../ui/responses/project/get-project-entries.response';
-import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { GetProjectEntriesResponse } from '../../../ui/responses/project/get-project-entries.response';
 
 @Injectable()
 export class GetProjectEntriesAction {

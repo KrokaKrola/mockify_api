@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { UpdateProjectRequest } from '../../../ui/requests/project/update-project.request';
 import { UpdateProjectResponse } from '../../../ui/responses/project/update-project.response';
-import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
-import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 
 @Injectable()
 export class UpdateProjectAction {

@@ -1,10 +1,10 @@
 import {
     equals,
+    registerDecorator,
     ValidationArguments,
     ValidationOptions,
     ValidatorConstraint,
     ValidatorConstraintInterface,
-    registerDecorator,
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'Match' })

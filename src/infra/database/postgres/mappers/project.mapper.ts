@@ -1,4 +1,5 @@
 import { EntitySchema } from 'typeorm';
+
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
 
 export const ProjectMapper = new EntitySchema<ProjectEntity>({

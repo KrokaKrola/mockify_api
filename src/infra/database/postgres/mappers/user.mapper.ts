@@ -1,6 +1,7 @@
 import { EntitySchema } from 'typeorm';
-import { UserEntity } from '../../../../domain/user/entities/user.entity';
+
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
+import { UserEntity } from '../../../../domain/user/entities/user.entity';
 
 export const UserMapper = new EntitySchema<UserEntity>({
     name: UserEntity.name,

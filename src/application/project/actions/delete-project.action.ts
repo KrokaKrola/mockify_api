@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 
 @Injectable()
 export class DeleteProjectAction {

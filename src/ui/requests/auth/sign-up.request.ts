@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+
 import { Match } from '../../../infra/rest/validators/match.decorator';
 
 export class SignUpRequest {

@@ -1,4 +1,5 @@
 import { EntitySchema } from 'typeorm';
+
 import { ProjectEntryEntity } from '../../../../domain/project/entities/project-entry.entity';
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
 

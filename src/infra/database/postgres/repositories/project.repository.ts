@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProjectMapper } from '../mappers/project.mapper';
+import { FindOneOptions, Repository } from 'typeorm';
+
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
+import { ProjectMapper } from '../mappers/project.mapper';
 
 @Injectable()
 export class ProjectRepository extends Repository<ProjectEntity> {
