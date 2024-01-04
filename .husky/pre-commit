@@ -3,3 +3,4 @@
 
 pnpm lint-staged
 pnpm test
+DB_PORT=5435 pnpm test:e2e

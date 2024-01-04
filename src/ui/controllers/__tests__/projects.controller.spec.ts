@@ -1,35 +1,45 @@
-import { ProjectsController } from '../projects.controller';
-import { Test } from '@nestjs/testing';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
-import { CreateProjectAction } from '../../../application/project/actions/create-project.action';
-import { UpdateProjectAction } from '../../../application/project/actions/update-project.action';
-import { DeleteProjectAction } from '../../../application/project/actions/delete-project.action';
-import { GetProjectsAction } from '../../../application/project/actions/get-projects.action';
-import { PrismaService } from 'nestjs-prisma';
 import { ConfigService } from '@nestjs/config';
-import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { Test } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Request } from 'express';
-import { CreateProjectRequest } from '../../requests/project/create-project.request';
-import { CreateProjectResponse } from '../../responses/project/create-project.response';
+
+import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
+import { CreateProjectAction } from '../../../application/project/actions/create-project.action';
+import { DeleteProjectEntryAction } from '../../../application/project/actions/delete-project-entry.action';
+import { DeleteProjectAction } from '../../../application/project/actions/delete-project.action';
+import { GetProjectEntriesAction } from '../../../application/project/actions/get-project-entries.action';
+import { GetProjectsAction } from '../../../application/project/actions/get-projects.action';
+import { UpdateProjectEntryAction } from '../../../application/project/actions/update-project-entry.action';
+import { UpdateProjectAction } from '../../../application/project/actions/update-project.action';
+import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { PostgresModule } from '../../../infra/database/postgres/postgres.module';
+import { ProjectEntryRepository } from '../../../infra/database/postgres/repositories/project-entry.repository';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
-import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
-import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
-import { GetProjectEntriesAction } from '../../../application/project/actions/get-project-entries.action';
-import { UpdateProjectEntryAction } from '../../../application/project/actions/update-project-entry.action';
-import { DeleteProjectEntryAction } from '../../../application/project/actions/delete-project-entry.action';
-import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import { AppConfigModule } from '../../../infra/ioc/app-config/app-config.module';
+import { CreateEntryRequest } from '../../requests/project/create-entry.request';
+import { CreateProjectRequest } from '../../requests/project/create-project.request';
+import { UpdateProjectEntryRequest } from '../../requests/project/update-project-entry.request';
+import { UpdateProjectRequest } from '../../requests/project/update-project.request';
 import { CreateProjectEntryResponse } from '../../responses/project/create-project-entry.response';
+import { CreateProjectResponse } from '../../responses/project/create-project.response';
+import { ProjectsController } from '../projects.controller';
 
 describe('ProjectsController', () => {
     let controller: ProjectsController;
-    let prismaService: PrismaService;
     let projectsRepository: ProjectRepository;
     let projectEntryRepository: ProjectEntryRepository;
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
+            imports: [
+                AppConfigModule,
+                PostgresModule,
+                TypeOrmModule.forFeature([ProjectEntity, ProjectEntryEntity]),
+            ],
             controllers: [ProjectsController],
             providers: [
                 ProjectRepository,
@@ -42,29 +52,26 @@ describe('ProjectsController', () => {
                 GetProjectEntriesAction,
                 UpdateProjectEntryAction,
                 DeleteProjectEntryAction,
-                PrismaService,
                 ConfigService,
             ],
         }).compile();
 
         controller = moduleRef.get<ProjectsController>(ProjectsController);
-        prismaService = moduleRef.get<PrismaService>(PrismaService);
         projectsRepository = moduleRef.get<ProjectRepository>(ProjectRepository);
         projectEntryRepository = moduleRef.get<ProjectEntryRepository>(ProjectEntryRepository);
     });
 
     afterEach(() => {
-        prismaService?.$disconnect();
         jest.resetAllMocks();
     });
 
     describe('getProjects', () => {
         it('should return projects', async () => {
-            jest.spyOn(projectsRepository, 'getUserProjects').mockImplementation(() => {
-                return Promise.resolve([
-                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date()),
-                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date()),
-                ]);
+            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+                const proj1 = new ProjectEntity('Project 1', 1, 1);
+                const proj2 = new ProjectEntity('Project 2', 1, 2);
+
+                return Promise.resolve([proj1, proj2]);
             });
 
             const response = await controller.getProjects({ user: { id: 1 } } as Request);
@@ -80,16 +87,16 @@ describe('ProjectsController', () => {
 
     describe('create', () => {
         it('should create a project', async () => {
-            jest.spyOn(projectsRepository, 'getUserProjects').mockImplementation(() => {
-                return Promise.resolve([
-                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date()),
-                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date()),
-                ]);
+            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+                const proj1 = new ProjectEntity('Project 1', 1, 1);
+                const proj2 = new ProjectEntity('Project 2', 1, 2);
+
+                return Promise.resolve([proj1, proj2]);
             });
 
-            const newProject = new ProjectEntity(3, 'Project 3', 1, new Date(), new Date());
+            const newProject = new ProjectEntity('Project 3', null, 3);
 
-            jest.spyOn(projectsRepository, 'create').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'save').mockImplementation(() => {
                 return Promise.resolve(newProject);
             });
 
@@ -105,22 +112,17 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user already has 5 projects', async () => {
-            jest.spyOn(projectsRepository, 'getUserProjects').mockImplementation(() => {
-                return Promise.resolve([
-                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date()),
-                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date()),
-                    new ProjectEntity(3, 'Project 3', 1, new Date(), new Date()),
-                    new ProjectEntity(4, 'Project 4', 1, new Date(), new Date()),
-                    new ProjectEntity(5, 'Project 5', 1, new Date(), new Date()),
-                ]);
+            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+                return Promise.resolve(
+                    Array(5)
+                        .fill(undefined)
+                        .map((_, i) => {
+                            return new ProjectEntity(`Project ${i + 1}`, 1, i + 1);
+                        }),
+                );
             });
 
-            const newProject = new ProjectEntity(6, 'Project 6', 1, new Date(), new Date());
-
-            jest.spyOn(projectsRepository, 'create').mockImplementation(() => {
-                return Promise.resolve(newProject);
-            });
-
+            const newProject = new ProjectEntity('Project 6', null, 6);
             const dto = new CreateProjectRequest(newProject.name);
 
             try {
@@ -135,19 +137,14 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if project already exists', async () => {
-            jest.spyOn(projectsRepository, 'getUserProjects').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
                 return Promise.resolve([
-                    new ProjectEntity(1, 'Project 1', 1, new Date(), new Date()),
-                    new ProjectEntity(2, 'Project 2', 1, new Date(), new Date()),
+                    new ProjectEntity('Project 1', null, 1),
+                    new ProjectEntity('Project 2', null, 2),
                 ]);
             });
 
-            const newProject = new ProjectEntity(3, 'Project 1', 1, new Date(), new Date());
-
-            jest.spyOn(projectsRepository, 'create').mockImplementation(() => {
-                return Promise.resolve(newProject);
-            });
-
+            const newProject = new ProjectEntity('Project 1');
             const dto = new CreateProjectRequest(newProject.name);
 
             try {
@@ -164,34 +161,33 @@ describe('ProjectsController', () => {
 
     describe('update', () => {
         it('should update a project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
-            const updatedProject = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const updatedProject = new ProjectEntity('Project 2');
 
             jest.spyOn(projectsRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(updatedProject);
+                return Promise.resolve(undefined);
             });
 
-            const dto = { name: updatedProject.name };
-
+            const dto = new UpdateProjectRequest(updatedProject.name);
             const response = await controller.update(dto, 1);
 
             expect(response).toEqual({
-                id: updatedProject.id,
+                id: project.id,
                 name: updatedProject.name,
             });
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
                 return Promise.resolve(undefined);
             });
 
-            const dto = { name: 'Project 1' };
+            const dto = new UpdateProjectRequest('Project 1');
 
             try {
                 await controller.update(dto, 1);
@@ -205,14 +201,14 @@ describe('ProjectsController', () => {
 
     describe('delete', () => {
         it('should delete a project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
             jest.spyOn(projectsRepository, 'delete').mockImplementation(() => {
-                return Promise.resolve();
+                return Promise.resolve(undefined);
             });
 
             await controller.delete(1);
@@ -221,8 +217,8 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(null);
             });
 
             try {
@@ -237,34 +233,35 @@ describe('ProjectsController', () => {
 
     describe('createEntry', () => {
         it('should create an entry', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [],
-                });
+            const newEntry = new ProjectEntryEntity('Entry 2', project.id);
+
+            project.projectEntries = [];
+
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const newEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
-
-            jest.spyOn(projectEntryRepository, 'create').mockImplementation(() => {
+            jest.spyOn(projectEntryRepository, 'save').mockImplementation(() => {
                 return Promise.resolve(newEntry);
             });
 
-            const dto = { name: newEntry.name };
+            const dto = new CreateProjectRequest(newEntry.name);
 
-            const response = await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+            const response = await controller.createEntry(dto, 1, {
+                user: { id: project.userId },
+            } as Request);
 
             expect(response).toEqual(new CreateProjectEntryResponse(newEntry.id, newEntry.name));
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(null);
             });
 
-            const dto = { name: 'Entry 1' };
+            const dto = new CreateEntryRequest('Entry 1');
 
             try {
                 await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
@@ -276,13 +273,10 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
             const dto = { name: 'Entry 1' };
@@ -297,21 +291,20 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if project already has 20 entries', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: new Array(20).map(
-                        (_, i) => new ProjectEntryEntity(i + 1, `Entry ${i + 1}`, project.id),
-                    ),
-                });
+            project.projectEntries = new Array(20).map((_, i) => {
+                return new ProjectEntryEntity(`Entry ${i + 1}`, project.id, i + 1);
             });
 
-            const dto = { name: 'Entry 21' };
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
+            });
+
+            const dto = new CreateEntryRequest('Entry 21');
 
             try {
-                await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+                await controller.createEntry(dto, 1, { user: { id: project.userId } } as Request);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Maximum number of entries reached');
@@ -320,19 +313,19 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if entry already exists', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
-                });
+            project.projectEntries = [entry];
+
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const dto = { name: 'Entry 1' };
+            const dto = new CreateEntryRequest('Entry 1');
 
             try {
-                await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
+                await controller.createEntry(dto, 1, { user: { id: project.userId } } as Request);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Entry with this name already exists');
@@ -343,25 +336,27 @@ describe('ProjectsController', () => {
 
     describe('getEntries', () => {
         it('should return entries', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
-                });
+            project.projectEntries = [entry];
+
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const response = await controller.getEntries(1, { user: { id: 1 } } as Request);
+            const response = await controller.getEntries(1, {
+                user: { id: project.userId },
+            } as Request);
 
             expect(response).toEqual({
-                entries: [{ id: 1, name: 'Entry 1' }],
+                entries: [{ id: entry.id, name: entry.name }],
             });
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(null);
             });
 
             try {
@@ -374,13 +369,10 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [new ProjectEntryEntity(1, 'Entry 1', project.id)],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
             try {
@@ -395,41 +387,39 @@ describe('ProjectsController', () => {
 
     describe('updateEntry', () => {
         it('should update an entry', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
 
-            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+            project.projectEntries = [entry];
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [entry],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const updatedEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+            const updatedEntry = new ProjectEntryEntity('Entry update', project.id, entry.id);
 
             jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(updatedEntry);
+                return Promise.resolve(undefined);
             });
 
-            const dto = { name: updatedEntry.name };
+            const dto = new UpdateProjectEntryRequest(updatedEntry.name);
 
             const response = await controller.updateEntry(dto, 1, 1, {
-                user: { id: 1 },
+                user: { id: project.userId },
             } as Request);
 
             expect(response).toEqual({
-                id: updatedEntry.id,
+                id: entry.id,
                 name: updatedEntry.name,
             });
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(null);
             });
 
-            const dto = { name: 'Entry 1' };
+            const dto = new UpdateProjectEntryRequest('Project 1');
 
             try {
                 await controller.updateEntry(dto, 1, 1, { user: { id: 1 } } as Request);
@@ -441,24 +431,17 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
-
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [entry],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
-
-            const updatedEntry = new ProjectEntryEntity(1, 'Entry 1', project.id);
 
             jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(updatedEntry);
+                return Promise.resolve(undefined);
             });
 
-            const dto = { name: updatedEntry.name };
+            const dto = new UpdateProjectEntryRequest('Project 1');
 
             try {
                 await controller.updateEntry(dto, 1, 1, {
@@ -472,47 +455,43 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if entry does not exist', async () => {
-            jest.spyOn(projectEntryRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+
+            project.projectEntries = [entry];
+
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const dto = { name: 'Entry 1' };
+            const dto = new UpdateProjectEntryRequest('Entry 2');
 
             try {
-                await controller.updateEntry(dto, 1, 1, { user: { id: 1 } } as Request);
+                await controller.updateEntry(dto, 1, 2, { user: { id: 1 } } as Request);
             } catch (error) {
                 expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
+                expect(error.message).toEqual('Entry with this id does not exist');
                 expect(error).toBeInstanceOf(ResourceNotFoundException);
             }
         });
 
         it('should throw an error if entry already exists', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry1 = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry2 = new ProjectEntryEntity('Entry 2', project.id, 2);
 
-            const entries = [
-                new ProjectEntryEntity(1, 'Entry 1', project.id),
-                new ProjectEntryEntity(2, 'Entry 2', 2),
-            ];
+            project.projectEntries = [entry1, entry2];
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: entries,
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
-            const updatedEntry = new ProjectEntryEntity(1, 'Entry 2', project.id);
-
-            jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(updatedEntry);
-            });
-
-            const dto = { name: updatedEntry.name };
+            const updatedEntry = new ProjectEntryEntity('Entry 2', project.id);
+            const dto = new UpdateProjectEntryRequest(updatedEntry.name);
 
             try {
-                await controller.updateEntry(dto, 1, 1, {
-                    user: { id: 1 },
+                await controller.updateEntry(dto, project.id, 1, {
+                    user: { id: project.userId },
                 } as Request);
             } catch (error) {
                 expect(error.status).toEqual(409);
@@ -524,29 +503,27 @@ describe('ProjectsController', () => {
 
     describe('deleteEntry', () => {
         it('should delete an entry', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
+            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
 
-            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
+            project.projectEntries = [entry];
 
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [entry],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
             jest.spyOn(projectEntryRepository, 'delete').mockImplementation(() => {
-                return Promise.resolve();
+                return Promise.resolve(undefined);
             });
 
-            await controller.deleteEntry(1, 1, { user: { id: 1 } } as Request);
+            await controller.deleteEntry(1, 1, { user: { id: project.userId } } as Request);
 
             expect(projectEntryRepository.delete).toHaveBeenCalledWith(entry.id);
         });
 
         it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve(undefined);
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(null);
             });
 
             try {
@@ -559,19 +536,14 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity(1, 'Project 1', 1, new Date(), new Date());
+            const project = new ProjectEntity('Project 1', 1, 1);
 
-            const entry = new ProjectEntryEntity(1, 'Entry 1', project.id);
-
-            jest.spyOn(projectsRepository, 'findByIdWithEntries').mockImplementation(() => {
-                return Promise.resolve({
-                    ...project,
-                    entries: [entry],
-                });
+            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+                return Promise.resolve(project);
             });
 
             jest.spyOn(projectEntryRepository, 'delete').mockImplementation(() => {
-                return Promise.resolve();
+                return Promise.resolve(undefined);
             });
 
             try {

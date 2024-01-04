@@ -1,38 +1,46 @@
-import { Test } from '@nestjs/testing';
-import { AuthController } from '../auth.controller';
-import { SignUpAction } from '../../../application/user/actions/sign-up.action';
+import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AccessTokenStrategy } from '../../../infra/auth/strategies/access-token.strategy';
-import { RefreshTokenStrategy } from '../../../infra/auth/strategies/refresh-token.strategy';
-import { SignInAction } from '../../../application/user/actions/sign-in.action';
-import { AuthService } from '../../../domain/user/services/auth.service';
-import { UserRepository } from '../../../infra/database/repositories/user.repository';
+import { Test } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Request } from 'express';
+
 import { LogoutAction } from '../../../application/user/actions/logout.action';
 import { RefreshTokensAction } from '../../../application/user/actions/refresh-tokens.action';
-import { SignUpRequest } from '../../requests/auth/sign-up.request';
-import { ConfigService } from '@nestjs/config';
-import { PrismaModule, PrismaService } from 'nestjs-prisma';
-import { SignUpResponse } from '../../responses/auth/sign-up.response';
-import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
-import { SignInRequest } from '../../requests/auth/sign-in.request';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
-import { SignInResponse } from '../../responses/auth/sign-in.response';
+import { SignInAction } from '../../../application/user/actions/sign-in.action';
+import { SignUpAction } from '../../../application/user/actions/sign-up.action';
 import { InvalidCredentialsException } from '../../../application/user/exceptions/invalid-credentials.exception';
-import { Request } from 'express';
-import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
-import { RefreshTokensResponse } from '../../responses/auth/refresh-tokens.response';
-import { NotFoundException } from '@nestjs/common';
+import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { AuthService } from '../../../domain/user/services/auth.service';
+import { AccessTokenStrategy } from '../../../infra/auth/strategies/access-token.strategy';
+import { RefreshTokenStrategy } from '../../../infra/auth/strategies/refresh-token.strategy';
+import { UserMapper } from '../../../infra/database/postgres/mappers/user.mapper';
+import { PostgresModule } from '../../../infra/database/postgres/postgres.module';
+import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
 import { AccessDeniedException } from '../../../infra/exceptions/access-denied.exception';
+import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
+import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { AppConfigModule } from '../../../infra/ioc/app-config/app-config.module';
+import { SignInRequest } from '../../requests/auth/sign-in.request';
+import { SignUpRequest } from '../../requests/auth/sign-up.request';
+import { RefreshTokensResponse } from '../../responses/auth/refresh-tokens.response';
+import { SignInResponse } from '../../responses/auth/sign-in.response';
+import { SignUpResponse } from '../../responses/auth/sign-up.response';
+import { AuthController } from '../auth.controller';
 
 describe('AuthController', () => {
     let authController: AuthController;
     let userRepository: UserRepository;
     let authService: AuthService;
-    let prismaService: PrismaService;
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [JwtModule.register({}), PrismaModule],
+            imports: [
+                AppConfigModule,
+                PostgresModule,
+                TypeOrmModule.forFeature([UserMapper]),
+                JwtModule.register({}),
+            ],
             controllers: [AuthController],
             providers: [
                 AccessTokenStrategy,
@@ -44,19 +52,16 @@ describe('AuthController', () => {
                 LogoutAction,
                 RefreshTokensAction,
                 ConfigService,
-                PrismaService,
             ],
         }).compile();
 
         authController = moduleRef.get<AuthController>(AuthController);
         userRepository = moduleRef.get<UserRepository>(UserRepository);
         authService = moduleRef.get<AuthService>(AuthService);
-        prismaService = moduleRef.get<PrismaService>(PrismaService);
     });
 
     afterEach(() => {
         jest.resetAllMocks();
-        prismaService?.$disconnect();
     });
 
     describe('signUp', () => {
@@ -68,20 +73,20 @@ describe('AuthController', () => {
                 '12345678',
             );
 
-            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+            jest.spyOn(userRepository, 'existsByEmail').mockImplementation(() => {
                 return Promise.resolve(null);
             });
 
-            jest.spyOn(userRepository, 'create').mockImplementation(() => {
-                return Promise.resolve(
-                    new UserEntity(
-                        signUpRequest.email,
-                        signUpRequest.name,
-                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
-                        null,
-                        1,
-                    ),
+            jest.spyOn(userRepository, 'save').mockImplementation(() => {
+                const user = new UserEntity(
+                    signUpRequest.email,
+                    signUpRequest.name,
+                    '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                    null,
+                    1,
                 );
+
+                return Promise.resolve(user);
             });
 
             const tokens = await authService.getTokens(1, signUpRequest.email);
@@ -98,10 +103,10 @@ describe('AuthController', () => {
 
             const hashedRefreshToken = await authService.hashValue(tokens.refreshToken);
 
-            expect(updateMock).toHaveBeenCalledWith({
-                id: 1,
-                refreshToken: hashedRefreshToken,
-            });
+            expect(updateMock).toHaveBeenCalledWith(
+                { id: 1 },
+                { refreshToken: hashedRefreshToken },
+            );
             expect(res).toEqual(
                 new SignUpResponse(
                     1,
@@ -121,16 +126,8 @@ describe('AuthController', () => {
                 '12345678',
             );
 
-            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
-                return Promise.resolve(
-                    new UserEntity(
-                        signUpRequest.email,
-                        signUpRequest.name,
-                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
-                        null,
-                        1,
-                    ),
-                );
+            jest.spyOn(userRepository, 'existsByEmail').mockImplementation(() => {
+                return Promise.resolve(true);
             });
 
             try {
@@ -147,16 +144,16 @@ describe('AuthController', () => {
         it('should return a valid SignInResponse', async () => {
             const signInRequest = new SignInRequest('test@mail.com', '12345678');
 
-            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
-                return Promise.resolve(
-                    new UserEntity(
-                        signInRequest.email,
-                        'Test',
-                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
-                        null,
-                        1,
-                    ),
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
+                const user = new UserEntity(
+                    signInRequest.email,
+                    'Test',
+                    '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                    null,
+                    1,
                 );
+
+                return Promise.resolve(user);
             });
 
             const tokens = await authService.getTokens(1, signInRequest.email);
@@ -173,10 +170,10 @@ describe('AuthController', () => {
 
             const hashedRefreshToken = await authService.hashValue(tokens.refreshToken);
 
-            expect(updateMock).toHaveBeenCalledWith({
-                id: 1,
-                refreshToken: hashedRefreshToken,
-            });
+            expect(updateMock).toHaveBeenCalledWith(
+                { id: 1 },
+                { refreshToken: hashedRefreshToken },
+            );
             expect(response).toEqual(
                 new SignInResponse(
                     1,
@@ -191,7 +188,7 @@ describe('AuthController', () => {
         it('should throw an error if the user does not exist', async () => {
             const signInRequest = new SignInRequest('', '');
 
-            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
                 return Promise.resolve(null);
             });
 
@@ -207,14 +204,13 @@ describe('AuthController', () => {
         it('should throw an error if invalid password was passed', async () => {
             const signInRequest = new SignInRequest('test@mail.com', '1234567');
 
-            jest.spyOn(userRepository, 'findByEmail').mockImplementation(() => {
+            jest.spyOn(userRepository, 'findOneByEmail').mockImplementation(() => {
                 return Promise.resolve(
                     new UserEntity(
                         signInRequest.email,
                         'Test',
                         '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
                         null,
-                        1,
                     ),
                 );
             });
@@ -240,21 +236,20 @@ describe('AuthController', () => {
             });
 
             jest.spyOn(userRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve({
-                    id: 1,
-                    email: 'test@mail.com',
-                    name: 'Test',
-                    password: '12345678',
-                    refreshToken: null,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    deletedAt: null,
-                });
+                return Promise.resolve(
+                    new UserEntity(
+                        'test@mail.com',
+                        'Test',
+                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                        null,
+                        1,
+                    ),
+                );
             });
 
             const response = await authController.logout(request);
 
-            expect(updateMock).toHaveBeenCalledWith({ id: 1, refreshToken: null });
+            expect(updateMock).toHaveBeenCalledWith({ id: 1 }, { refreshToken: null });
             expect(response).toEqual(undefined);
         });
 
@@ -284,15 +279,15 @@ describe('AuthController', () => {
             } as Request;
 
             jest.spyOn(userRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(
-                    new UserEntity(
-                        request.user.email,
-                        'Test',
-                        '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
-                        'b2d2e889a08f165ccc4990dc29ccc2193cb47f7761e96080dea3cb94decda87872a83dd432b0261d19c66aaf52893367b26ac29d8b1f3d12d458607414245d8f326d6b7ca878ad206e42d8522e06c9ddb9db07773b58e95303d8821f64a4ea41d2ab171d862e6f58a0057cfe8515a4df852ce504b2f0e985bfd531ea70cc3a',
-                        1,
-                    ),
+                const user = new UserEntity(
+                    request.user.email,
+                    'Test',
+                    '29a4cac624cd2b3fcedd4b807db0c90ad1fe74bbd2e7ac7c861bbbd438a1fe7524c288f70c19e2a7c10f8c74999565dd8a4d3ce190b7ce456882017157766f303ab8339e1984965c358280e5b071941709a7e40aa47e1e311e665a03f749291068f69f66c5dfe45d2fa07dc93178fcc3afef20e05f0cfa8112c426f7bdd649',
+                    'b2d2e889a08f165ccc4990dc29ccc2193cb47f7761e96080dea3cb94decda87872a83dd432b0261d19c66aaf52893367b26ac29d8b1f3d12d458607414245d8f326d6b7ca878ad206e42d8522e06c9ddb9db07773b58e95303d8821f64a4ea41d2ab171d862e6f58a0057cfe8515a4df852ce504b2f0e985bfd531ea70cc3a',
+                    1,
                 );
+
+                return Promise.resolve(user);
             });
 
             jest.spyOn(userRepository, 'update').mockImplementation(() => {
@@ -309,10 +304,12 @@ describe('AuthController', () => {
 
             const hashedRefreshToken = await authService.hashValue(tokens.refreshToken);
 
-            expect(updateMock).toHaveBeenCalledWith({
-                id: 1,
-                refreshToken: hashedRefreshToken,
-            });
+            expect(updateMock).toHaveBeenCalledWith(
+                {
+                    id: 1,
+                },
+                { refreshToken: hashedRefreshToken },
+            );
             expect(result).toEqual(
                 new RefreshTokensResponse(tokens.accessToken, tokens.refreshToken),
             );

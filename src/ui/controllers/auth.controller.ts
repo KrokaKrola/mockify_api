@@ -1,16 +1,17 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
-import { SignUpAction } from '../../application/user/actions/sign-up.action';
-import { SignInAction } from '../../application/user/actions/sign-in.action';
-import { SignUpRequest } from '../requests/auth/sign-up.request';
-import { SignUpResponse } from '../responses/auth/sign-up.response';
-import { SignInRequest } from '../requests/auth/sign-in.request';
-import { SignInResponse } from '../responses/auth/sign-in.response';
 import { Request } from 'express';
-import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
-import { RefreshTokenGuard } from '../../infra/auth/guards/refresh-token.guard';
+
 import { LogoutAction } from '../../application/user/actions/logout.action';
 import { RefreshTokensAction } from '../../application/user/actions/refresh-tokens.action';
+import { SignInAction } from '../../application/user/actions/sign-in.action';
+import { SignUpAction } from '../../application/user/actions/sign-up.action';
+import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
+import { RefreshTokenGuard } from '../../infra/auth/guards/refresh-token.guard';
+import { SignInRequest } from '../requests/auth/sign-in.request';
+import { SignUpRequest } from '../requests/auth/sign-up.request';
 import { RefreshTokensResponse } from '../responses/auth/refresh-tokens.response';
+import { SignInResponse } from '../responses/auth/sign-in.response';
+import { SignUpResponse } from '../responses/auth/sign-up.response';
 
 @Controller('auth')
 export class AuthController {

@@ -1,14 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
-import * as chalk from 'chalk';
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import * as bodyParser from 'body-parser';
+import * as chalk from 'chalk';
+import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+
+import { AppModule } from './app.module';
 import { LoggingInterceptor } from './infra/rest/interceptors/logging.interceptor';
 import { ValidationTransformPipe } from './infra/rest/pipes/validation-transform.pipe';
-import { PrismaService } from 'nestjs-prisma';
 
 async function bootstrap(): Promise<INestApplication> {
     const app = await NestFactory.create(AppModule);
@@ -28,17 +28,6 @@ async function bootstrap(): Promise<INestApplication> {
 
     app.useGlobalInterceptors(new LoggingInterceptor());
     app.useGlobalPipes(new ValidationTransformPipe());
-
-    const prismaService = app.get(PrismaService);
-
-    prismaService.$on('query', (e) => {
-        Logger.debug(
-            `🟣 ${chalk.hex('#e3fc17').bold('Query')}: ${chalk.hex('#28880a')(e.query)} ╏ ${chalk
-                .hex('#e3fc17')
-                .bold('Params')}: ${chalk.hex('#28880a')(e.params)}`,
-            'PrismaQuery',
-        );
-    });
 
     await app.listen(configService.get('APP_PORT') || 3000);
 

@@ -11,26 +11,27 @@ import {
     Req,
     UseGuards,
 } from '@nestjs/common';
-import { CreateProjectAction } from '../../application/project/actions/create-project.action';
-import { CreateProjectResponse } from '../responses/project/create-project.response';
-import { CreateProjectRequest } from '../requests/project/create-project.request';
-import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { Request } from 'express';
-import { UpdateProjectRequest } from '../requests/project/update-project.request';
-import { UpdateProjectResponse } from '../responses/project/update-project.response';
-import { UpdateProjectAction } from '../../application/project/actions/update-project.action';
-import { DeleteProjectAction } from '../../application/project/actions/delete-project.action';
-import { GetProjectsAction } from '../../application/project/actions/get-projects.action';
-import { GetProjectsResponse } from '../responses/project/get-projects.response';
-import { CreateEntryRequest } from '../requests/project/create-entry.request';
+
 import { CreateProjectEntryAction } from '../../application/project/actions/create-project-entry.action';
-import { CreateProjectEntryResponse } from '../responses/project/create-project-entry.response';
-import { GetProjectEntriesAction } from '../../application/project/actions/get-project-entries.action';
-import { GetProjectEntriesResponse } from '../responses/project/get-project-entries.response';
-import { UpdateProjectEntryRequest } from '../requests/project/update-project-entry.request';
-import { UpdateProjectEntryAction } from '../../application/project/actions/update-project-entry.action';
-import { UpdateProjectEntryResponse } from '../responses/project/update-project-entry.response';
+import { CreateProjectAction } from '../../application/project/actions/create-project.action';
 import { DeleteProjectEntryAction } from '../../application/project/actions/delete-project-entry.action';
+import { DeleteProjectAction } from '../../application/project/actions/delete-project.action';
+import { GetProjectEntriesAction } from '../../application/project/actions/get-project-entries.action';
+import { GetProjectsAction } from '../../application/project/actions/get-projects.action';
+import { UpdateProjectEntryAction } from '../../application/project/actions/update-project-entry.action';
+import { UpdateProjectAction } from '../../application/project/actions/update-project.action';
+import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
+import { CreateEntryRequest } from '../requests/project/create-entry.request';
+import { CreateProjectRequest } from '../requests/project/create-project.request';
+import { UpdateProjectEntryRequest } from '../requests/project/update-project-entry.request';
+import { UpdateProjectRequest } from '../requests/project/update-project.request';
+import { CreateProjectEntryResponse } from '../responses/project/create-project-entry.response';
+import { CreateProjectResponse } from '../responses/project/create-project.response';
+import { GetProjectEntriesResponse } from '../responses/project/get-project-entries.response';
+import { GetProjectsResponse } from '../responses/project/get-projects.response';
+import { UpdateProjectEntryResponse } from '../responses/project/update-project-entry.response';
+import { UpdateProjectResponse } from '../responses/project/update-project.response';
 
 @Controller('projects')
 @UseGuards(AccessTokenGuard)

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserRepository } from '../../../infra/database/repositories/user.repository';
+
+import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 
 @Injectable()
@@ -13,6 +14,6 @@ export class LogoutAction {
             throw new ResourceNotFoundException('User not found');
         }
 
-        await this.userRepository.update({ id: userId, refreshToken: null });
+        await this.userRepository.update({ id: userId }, { refreshToken: null });
     }
 }
