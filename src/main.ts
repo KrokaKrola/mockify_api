@@ -8,7 +8,6 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LoggingInterceptor } from './infra/rest/interceptors/logging.interceptor';
 import { ValidationTransformPipe } from './infra/rest/pipes/validation-transform.pipe';
-import { PrismaService } from 'nestjs-prisma';
 
 async function bootstrap(): Promise<INestApplication> {
     const app = await NestFactory.create(AppModule);
@@ -28,17 +27,6 @@ async function bootstrap(): Promise<INestApplication> {
 
     app.useGlobalInterceptors(new LoggingInterceptor());
     app.useGlobalPipes(new ValidationTransformPipe());
-
-    const prismaService = app.get(PrismaService);
-
-    prismaService.$on('query', (e) => {
-        Logger.debug(
-            `🟣 ${chalk.hex('#e3fc17').bold('Query')}: ${chalk.hex('#28880a')(e.query)} ╏ ${chalk
-                .hex('#e3fc17')
-                .bold('Params')}: ${chalk.hex('#28880a')(e.params)}`,
-            'PrismaQuery',
-        );
-    });
 
     await app.listen(configService.get('APP_PORT') || 3000);
 

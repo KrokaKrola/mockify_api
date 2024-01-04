@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateProjectEntryRequest } from '../../../ui/requests/project/update-project-entry.request';
 import { UpdateProjectEntryResponse } from '../../../ui/responses/project/update-project-entry.response';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
-import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ProjectEntryRepository } from '../../../infra/database/postgres/repositories/project-entry.repository';
 
 @Injectable()
 export class UpdateProjectEntryAction {
@@ -19,7 +19,10 @@ export class UpdateProjectEntryAction {
         entryId: number,
         userId: number,
     ): Promise<UpdateProjectEntryResponse> {
-        const project = await this.projectRepository.findByIdWithEntries(projectId);
+        const project = await this.projectRepository.findOne({
+            where: { id: projectId },
+            relations: ['projectEntries'],
+        });
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -29,24 +32,24 @@ export class UpdateProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        const entity = project.entries.find((projEntry) => projEntry.id === entryId);
+        const entry = project.projectEntries.find((projEntry) => projEntry.id === entryId);
 
-        if (!entity) {
+        if (!entry) {
             throw new ResourceNotFoundException('Entry with this id does not exist');
         }
 
-        const existingEntry = project.entries.find(
-            (e) => e.name === dto.name && e.name !== dto.name,
+        const existingEntry = project.projectEntries.find(
+            (e) => e.name === dto.name && e.id !== entryId,
         );
 
         if (existingEntry) {
             throw new ResourceExistsException('Entry with this name already exists');
         }
 
-        entity.name = dto.name;
+        entry.name = dto.name;
 
-        const updatedEntry = await this.projectEntryRepository.update(entity);
+        await this.projectEntryRepository.update({ id: entryId }, entry);
 
-        return new UpdateProjectEntryResponse(updatedEntry.id, updatedEntry.name);
+        return new UpdateProjectEntryResponse(entry.id, entry.name);
     }
 }

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
 import { CreateEntryRequest } from '../../../ui/requests/project/create-entry.request';
 import { CreateProjectEntryResponse } from '../../../ui/responses/project/create-project-entry.response';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ProjectEntryRepository } from '../../../infra/database/postgres/repositories/project-entry.repository';
+import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
 
 @Injectable()
 export class CreateProjectEntryAction {
@@ -19,7 +20,10 @@ export class CreateProjectEntryAction {
         userId: number,
         projectId: number,
     ): Promise<CreateProjectEntryResponse> {
-        const project = await this.projectRepository.findByIdWithEntries(projectId);
+        const project = await this.projectRepository.findOne({
+            where: { id: projectId },
+            relations: ['projectEntries'],
+        });
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -29,16 +33,20 @@ export class CreateProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        if (project.entries.length >= 20) {
+        if (project.projectEntries.length >= 20) {
             throw new MaximumResourceNumberException('Maximum number of entries reached');
         }
 
-        const entry = project.entries.find((e) => e.name === dto.name);
+        const entry = project.projectEntries.find((e) => e.name === dto.name);
         if (entry) {
             throw new ResourceExistsException('Entry with this name already exists');
         }
 
-        const createdEntry = await this.entryRepository.create(dto.name, projectId);
+        const newEntry = new ProjectEntryEntity(dto.name, projectId);
+
+        const createdEntry = this.entryRepository.create(newEntry);
+
+        await this.entryRepository.save(createdEntry);
 
         return new CreateProjectEntryResponse(createdEntry.id, createdEntry.name);
     }

@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { SignInRequest } from '../../../ui/requests/auth/sign-in.request';
 import { SignInResponse } from '../../../ui/responses/auth/sign-in.response';
 import { AuthService } from '../../../domain/user/services/auth.service';
-import { UserRepository } from '../../../infra/database/repositories/user.repository';
 import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
-import { UserEntity } from '../../../domain/user/entities/user.entity';
+import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
 
 @Injectable()
 export class SignInAction {
@@ -14,7 +13,7 @@ export class SignInAction {
     ) {}
 
     public async execute(dto: SignInRequest): Promise<SignInResponse> {
-        const user: UserEntity = await this.userRepository.findByEmail(dto.email);
+        const user = await this.userRepository.findOne({ where: { email: dto.email } });
 
         if (!user) {
             throw new InvalidCredentialsException();
@@ -33,7 +32,7 @@ export class SignInAction {
 
         const hashedRefreshToken = await this.authService.hashValue(tokens.refreshToken);
 
-        await this.userRepository.update({ id: user.id, refreshToken: hashedRefreshToken });
+        await this.userRepository.update({ id: user.id }, { refreshToken: hashedRefreshToken });
 
         return new SignInResponse(
             user.id,

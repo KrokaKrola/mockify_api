@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
-import { ProjectEntryRepository } from '../../../infra/database/repositories/project-entry.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ProjectEntryRepository } from '../../../infra/database/postgres/repositories/project-entry.repository';
 
 @Injectable()
 export class DeleteProjectEntryAction {
@@ -11,7 +11,10 @@ export class DeleteProjectEntryAction {
     ) {}
 
     public async execute(projectId: number, entryId: number, userId: number): Promise<void> {
-        const project = await this.projectRepository.findByIdWithEntries(projectId);
+        const project = await this.projectRepository.findOne({
+            where: { id: projectId },
+            relations: ['projectEntries'],
+        });
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -21,7 +24,7 @@ export class DeleteProjectEntryAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        const entry = project.entries.find((e) => e.id === entryId);
+        const entry = project.projectEntries.find((e) => e.id === entryId);
 
         if (!entry) {
             throw new ResourceNotFoundException('Entry with this id does not exist');

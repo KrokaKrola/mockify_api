@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "migration:generate": "prisma migrate dev --create-only --name=${npm_config_name} && sh ./scripts/generate_migration_down.sh",
+    "migration:create": "typeorm migration:create ./src/infra/database/postgres/migrations/${NAME}",
     "echo": "echo ${npm_config_name}"
   },
   "dependencies": {
@@ -30,7 +30,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
-    "@prisma/client": "5.7.0",
+    "@nestjs/typeorm": "^10.0.1",
     "body-parser": "^1.20.2",
     "chalk": "^4.1.2",
     "class-transformer": "^0.5.1",
@@ -38,11 +38,11 @@
     "cookie-parser": "^1.4.6",
     "helmet": "^7.1.0",
     "joi": "^17.11.0",
-    "nestjs-prisma": "^0.22.0",
     "passport-jwt": "^4.0.1",
-    "prisma": "^5.7.0",
+    "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.19"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -93,10 +93,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "prisma": {
-    "schema": "./src/infra/database/prisma/schema.prisma",
-    "migrations": "./src/infra/database/prisma/migrations"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [

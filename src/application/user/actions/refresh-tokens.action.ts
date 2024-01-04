@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepository } from '../../../infra/database/repositories/user.repository';
 import { AccessDeniedException } from '../../../infra/exceptions/access-denied.exception';
 import { AuthService } from '../../../domain/user/services/auth.service';
 import { Request } from 'express';
 import { RefreshTokensResponse } from '../../../ui/responses/auth/refresh-tokens.response';
+import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
 
 @Injectable()
 export class RefreshTokensAction {
@@ -14,7 +14,7 @@ export class RefreshTokensAction {
 
     public async execute(req: Request): Promise<RefreshTokensResponse> {
         const { id, refreshToken, email } = req.user;
-        const user = await this.userRepository.findById(id);
+        const user = await this.userRepository.findOne({ where: { id } });
 
         if (!user) {
             throw new NotFoundException('User not found', 'user');
@@ -37,7 +37,7 @@ export class RefreshTokensAction {
 
         const hashedRefreshToken = await this.authService.hashValue(tokens.refreshToken);
 
-        await this.userRepository.update({ id, refreshToken: hashedRefreshToken });
+        await this.userRepository.update({ id }, { refreshToken: hashedRefreshToken });
 
         return new RefreshTokensResponse(tokens.accessToken, tokens.refreshToken);
     }

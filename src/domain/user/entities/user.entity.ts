@@ -1,25 +1,11 @@
-import { type User } from '@prisma/client';
 import { ProjectEntity } from '../../project/entities/project.entity';
 
-export class UserEntity implements User {
-    constructor(
-        email: string,
-        name: string,
-        password: string,
-        refreshToken?: string,
-        id?: number,
-        projects?: ProjectEntity[],
-        createdAt?: Date,
-        updatedAt?: Date,
-    ) {
-        this.id = id;
+export class UserEntity {
+    constructor(email: string, name: string, password: string, refreshToken?: string) {
         this.email = email;
         this.name = name;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.password = password;
-        this.refreshToken = refreshToken;
-        this.projects = projects;
+        this.refreshToken = refreshToken ?? null;
     }
 
     public password: string;
@@ -38,5 +24,5 @@ export class UserEntity implements User {
 
     public refreshToken: string;
 
-    public projects?: ProjectEntity[];
+    public projects: ProjectEntity[];
 }

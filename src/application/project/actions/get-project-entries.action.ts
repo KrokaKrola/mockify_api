@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { GetProjectEntriesResponse } from '../../../ui/responses/project/get-project-entries.response';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 
 @Injectable()
 export class GetProjectEntriesAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(projectId: number, userId: number): Promise<GetProjectEntriesResponse> {
-        const project = await this.projectRepository.findByIdWithEntries(projectId);
+        // TODO: change to ProjectEntryRepository
+        const project = await this.projectRepository.findOne({
+            where: { id: projectId },
+            relations: ['projectEntries'],
+        });
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -18,6 +22,6 @@ export class GetProjectEntriesAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        return new GetProjectEntriesResponse(project.entries);
+        return new GetProjectEntriesResponse(project.projectEntries);
     }
 }

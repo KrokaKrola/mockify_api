@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectRepository } from '../../../infra/database/repositories/project.repository';
 import { CreateProjectResponse } from '../../../ui/responses/project/create-project.response';
 import { CreateProjectRequest } from '../../../ui/requests/project/create-project.request';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
+import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 
 @Injectable()
 export class CreateProjectAction {
@@ -13,7 +13,7 @@ export class CreateProjectAction {
         dto: CreateProjectRequest,
         userId: number,
     ): Promise<CreateProjectResponse> {
-        const userProjects = await this.projectRepository.getUserProjects(userId);
+        const userProjects = await this.projectRepository.find({ where: { userId } });
 
         if (userProjects.length >= 5) {
             throw new MaximumResourceNumberException('User already has 5 projects', 'user');
@@ -25,7 +25,9 @@ export class CreateProjectAction {
             throw new ResourceExistsException('Project already exists', 'name');
         }
 
-        const createdProject = await this.projectRepository.create(dto.name, userId);
+        const createdProject = this.projectRepository.create({ name: dto.name, userId });
+
+        await this.projectRepository.save(createdProject);
 
         return new CreateProjectResponse(createdProject.id, createdProject.name);
     }
