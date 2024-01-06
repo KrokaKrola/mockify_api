@@ -4,8 +4,9 @@ import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
-import { CreateProjectRequest } from '../../../ui/requests/project/create-project.request';
 import { CreateProjectResponse } from '../../../ui/responses/project/create-project.response';
+
+import type { CreateProjectRequest } from '../../../ui/requests/project/create-project.request';
 
 @Injectable()
 export class CreateProjectAction {

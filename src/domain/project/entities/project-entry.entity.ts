@@ -1,4 +1,4 @@
-import { ProjectEntity } from './project.entity';
+import type { ProjectEntity } from './project.entity';
 
 export class ProjectEntryEntity {
     public id: number;

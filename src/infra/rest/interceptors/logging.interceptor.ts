@@ -1,8 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import * as chalk from 'chalk';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
+import type { Observable } from 'rxjs';
 
 /**
  * Logger Interceptor.

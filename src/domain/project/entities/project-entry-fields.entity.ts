@@ -1,5 +1,5 @@
-import { FieldTypeEnum } from '../enums/field-type.enum';
-import { ProjectEntryEntity } from './project-entry.entity';
+import type { FieldTypeEnum } from '../enums/field-type.enum';
+import type { ProjectEntryEntity } from './project-entry.entity';
 
 export class ProjectEntryFieldsEntity {
     public id: number;

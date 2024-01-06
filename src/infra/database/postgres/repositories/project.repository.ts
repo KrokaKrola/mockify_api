@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import type { FindOneOptions } from 'typeorm';
 
-import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
 import { ProjectMapper } from '../mappers/project.mapper';
+
+import type { ProjectEntity } from '../../../../domain/project/entities/project.entity';
 
 @Injectable()
 export class ProjectRepository extends Repository<ProjectEntity> {

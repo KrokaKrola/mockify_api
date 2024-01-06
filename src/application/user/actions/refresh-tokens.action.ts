@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Request } from 'express';
+import type { Request } from 'express';
 
 import { AuthService } from '../../../domain/user/services/auth.service';
 import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';

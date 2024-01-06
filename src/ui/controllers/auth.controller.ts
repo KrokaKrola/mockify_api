@@ -10,9 +10,10 @@ import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { RefreshTokenGuard } from '../../infra/auth/guards/refresh-token.guard';
 import { SignInRequest } from '../requests/auth/sign-in.request';
 import { SignUpRequest } from '../requests/auth/sign-up.request';
-import { RefreshTokensResponse } from '../responses/auth/refresh-tokens.response';
-import { SignInResponse } from '../responses/auth/sign-in.response';
-import { SignUpResponse } from '../responses/auth/sign-up.response';
+
+import type { RefreshTokensResponse } from '../responses/auth/refresh-tokens.response';
+import type { SignInResponse } from '../responses/auth/sign-in.response';
+import type { SignUpResponse } from '../responses/auth/sign-up.response';
 
 @Controller('auth')
 export class AuthController {

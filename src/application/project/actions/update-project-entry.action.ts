@@ -4,8 +4,9 @@ import { ProjectEntryRepository } from '../../../infra/database/postgres/reposit
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
-import { UpdateProjectEntryRequest } from '../../../ui/requests/project/update-project-entry.request';
 import { UpdateProjectEntryResponse } from '../../../ui/responses/project/update-project-entry.response';
+
+import type { UpdateProjectEntryRequest } from '../../../ui/requests/project/update-project-entry.request';
 
 @Injectable()
 export class UpdateProjectEntryAction {

@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthService } from '../../../domain/user/services/auth.service';
 import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
-import { SignInRequest } from '../../../ui/requests/auth/sign-in.request';
 import { SignInResponse } from '../../../ui/responses/auth/sign-in.response';
 import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
+
+import type { SignInRequest } from '../../../ui/requests/auth/sign-in.request';
 
 @Injectable()
 export class SignInAction {

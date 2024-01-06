@@ -1,4 +1,4 @@
-import { INestApplication, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as chalk from 'chalk';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import type { INestApplication } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { LoggingInterceptor } from './infra/rest/interceptors/logging.interceptor';

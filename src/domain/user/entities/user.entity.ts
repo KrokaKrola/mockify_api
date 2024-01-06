@@ -1,4 +1,4 @@
-import { ProjectEntity } from '../../project/entities/project.entity';
+import type { ProjectEntity } from '../../project/entities/project.entity';
 
 export class UserEntity {
     constructor(email: string, name: string, password: string, refreshToken?: string, id?: number) {

@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Request } from 'express';
+import type { Request } from 'express';
 
 import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
 import { CreateProjectAction } from '../../../application/project/actions/create-project.action';

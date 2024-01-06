@@ -1,4 +1,4 @@
-import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import type { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
 
 class ProjectEntry {
     constructor(name: string, id: number) {

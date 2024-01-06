@@ -4,8 +4,9 @@ import { UserEntity } from '../../../domain/user/entities/user.entity';
 import { AuthService } from '../../../domain/user/services/auth.service';
 import { UserRepository } from '../../../infra/database/postgres/repositories/user.repository';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
-import { SignUpRequest } from '../../../ui/requests/auth/sign-up.request';
 import { SignUpResponse } from '../../../ui/responses/auth/sign-up.response';
+
+import type { SignUpRequest } from '../../../ui/requests/auth/sign-up.request';
 
 @Injectable()
 export class SignUpAction {

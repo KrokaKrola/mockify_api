@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Request } from 'express';
+import type { Request } from 'express';
 
 import { LogoutAction } from '../../../application/user/actions/logout.action';
 import { RefreshTokensAction } from '../../../application/user/actions/refresh-tokens.action';

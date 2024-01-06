@@ -52,5 +52,6 @@ module.exports = {
         'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: false }],
         curly: 'error',
         'import/no-extraneous-dependencies': 'off',
+        '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
 };

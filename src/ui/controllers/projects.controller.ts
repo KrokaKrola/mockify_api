@@ -27,12 +27,13 @@ import { CreateEntryRequest } from '../requests/project/create-entry.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
 import { UpdateProjectEntryRequest } from '../requests/project/update-project-entry.request';
 import { UpdateProjectRequest } from '../requests/project/update-project.request';
-import { CreateProjectEntryResponse } from '../responses/project/create-project-entry.response';
-import { CreateProjectResponse } from '../responses/project/create-project.response';
-import { GetProjectEntriesResponse } from '../responses/project/get-project-entries.response';
-import { GetProjectsResponse } from '../responses/project/get-projects.response';
-import { UpdateProjectEntryResponse } from '../responses/project/update-project-entry.response';
-import { UpdateProjectResponse } from '../responses/project/update-project.response';
+
+import type { CreateProjectEntryResponse } from '../responses/project/create-project-entry.response';
+import type { CreateProjectResponse } from '../responses/project/create-project.response';
+import type { GetProjectEntriesResponse } from '../responses/project/get-project-entries.response';
+import type { GetProjectsResponse } from '../responses/project/get-projects.response';
+import type { UpdateProjectEntryResponse } from '../responses/project/update-project-entry.response';
+import type { UpdateProjectResponse } from '../responses/project/update-project.response';
 
 @Controller('projects')
 @UseGuards(AccessTokenGuard)

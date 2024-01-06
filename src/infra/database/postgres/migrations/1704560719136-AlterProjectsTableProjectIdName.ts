@@ -1,4 +1,5 @@
-import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
+import { TableColumn } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AlterProjectsTableProjectIdName1704560719136 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
