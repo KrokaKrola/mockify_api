@@ -1,5 +1,6 @@
 import * as crypto from 'node:crypto';
 import { promisify } from 'node:util';
+
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';

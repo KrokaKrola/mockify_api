@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+
 import { Request } from 'express';
 
 import { LogoutAction } from '../../application/user/actions/logout.action';

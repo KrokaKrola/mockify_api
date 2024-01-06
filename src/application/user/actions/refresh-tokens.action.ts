@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { Request } from 'express';
 
 import { AuthService } from '../../../domain/user/services/auth.service';
