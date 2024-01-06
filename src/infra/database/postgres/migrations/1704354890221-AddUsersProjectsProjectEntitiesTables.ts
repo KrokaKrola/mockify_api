@@ -1,4 +1,5 @@
 import { Table, TableForeignKey } from 'typeorm';
+
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddUsersProjectsProjectEntitiesTables1704354890221 implements MigrationInterface {

@@ -1,4 +1,5 @@
 import { Table } from 'typeorm';
+
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddProjectEntryFieldsTable1704567471989 implements MigrationInterface {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
+
 import type { FindOneOptions } from 'typeorm';
 
 import { ProjectMapper } from '../mappers/project.mapper';
