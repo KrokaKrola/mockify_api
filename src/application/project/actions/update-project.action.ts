@@ -20,6 +20,6 @@ export class UpdateProjectAction {
 
         project.name = dto.name;
 
-        return new UpdateProjectResponse(project.id, project.name);
+        return new UpdateProjectResponse(project.publicId, project.name);
     }
 }

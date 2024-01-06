@@ -1,12 +1,12 @@
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 
 class ProjectResponse {
-    constructor(id: number, name: string) {
+    constructor(id: string, name: string) {
         this.id = id;
         this.name = name;
     }
 
-    public id: number;
+    public id: string;
 
     public name: string;
 }
@@ -16,7 +16,7 @@ export class GetProjectsResponse {
 
     constructor(projects: ProjectEntity[]) {
         this.projects = projects.map((project) => {
-            return new ProjectResponse(project.id, project.name);
+            return new ProjectResponse(project.publicId, project.name);
         });
     }
 }

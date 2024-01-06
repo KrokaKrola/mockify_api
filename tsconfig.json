@@ -17,7 +17,8 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "allowJs": true
+    "allowJs": true,
+    "preserveWatchOutput": true,
   },
   "exclude": ["node_modules", "dist"],
   "include": ["src/**/*.ts", "global.d.ts", "test/**/*.ts"]

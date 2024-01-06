@@ -1,6 +1,9 @@
+import * as crypto from 'node:crypto';
+
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Request } from 'express';
 
 import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
@@ -26,6 +29,7 @@ import { UpdateProjectEntryRequest } from '../../requests/project/update-project
 import { UpdateProjectRequest } from '../../requests/project/update-project.request';
 import { CreateProjectEntryResponse } from '../../responses/project/create-project-entry.response';
 import { CreateProjectResponse } from '../../responses/project/create-project.response';
+import { UpdateProjectResponse } from '../../responses/project/update-project.response';
 import { ProjectsController } from '../projects.controller';
 
 describe('ProjectsController', () => {
@@ -67,9 +71,14 @@ describe('ProjectsController', () => {
 
     describe('getProjects', () => {
         it('should return projects', async () => {
+            const uuid1 = crypto.randomUUID();
+            const uuid2 = crypto.randomUUID();
             jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
                 const proj1 = new ProjectEntity('Project 1', 1, 1);
                 const proj2 = new ProjectEntity('Project 2', 1, 2);
+
+                proj1.publicId = uuid1;
+                proj2.publicId = uuid2;
 
                 return Promise.resolve([proj1, proj2]);
             });
@@ -78,8 +87,8 @@ describe('ProjectsController', () => {
 
             expect(response).toEqual({
                 projects: [
-                    { id: 1, name: 'Project 1' },
-                    { id: 2, name: 'Project 2' },
+                    { id: uuid1, name: 'Project 1' },
+                    { id: uuid2, name: 'Project 2' },
                 ],
             });
         });
@@ -95,6 +104,7 @@ describe('ProjectsController', () => {
             });
 
             const newProject = new ProjectEntity('Project 3', null, 3);
+            newProject.publicId = crypto.randomUUID();
 
             jest.spyOn(projectsRepository, 'save').mockImplementation(() => {
                 return Promise.resolve(newProject);
@@ -106,7 +116,10 @@ describe('ProjectsController', () => {
                 user: { id: 1 },
             } as Request);
 
-            const newProjectResponse = new CreateProjectResponse(newProject.id, newProject.name);
+            const newProjectResponse = new CreateProjectResponse(
+                newProject.publicId,
+                newProject.name,
+            );
 
             expect(response).toEqual(newProjectResponse);
         });
@@ -162,6 +175,7 @@ describe('ProjectsController', () => {
     describe('update', () => {
         it('should update a project', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
+            project.publicId = crypto.randomUUID();
 
             jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
                 return Promise.resolve(project);
@@ -176,10 +190,9 @@ describe('ProjectsController', () => {
             const dto = new UpdateProjectRequest(updatedProject.name);
             const response = await controller.update(dto, 1);
 
-            expect(response).toEqual({
-                id: project.id,
-                name: updatedProject.name,
-            });
+            expect(response).toEqual(
+                new UpdateProjectResponse(project.publicId, updatedProject.name),
+            );
         });
 
         it('should throw an error if project does not exist', async () => {

@@ -12,9 +12,9 @@ export const ProjectMapper = new EntitySchema<ProjectEntity>({
             primary: true,
             generated: true,
         },
-        projectId: {
+        publicId: {
             type: 'uuid',
-            name: 'project_id',
+            name: 'public_id',
             nullable: false,
             generated: 'uuid',
         },
@@ -37,6 +37,11 @@ export const ProjectMapper = new EntitySchema<ProjectEntity>({
             name: 'deleted_at',
             type: 'timestamp with time zone',
             deleteDate: true,
+        },
+        userId: {
+            name: 'user_id',
+            type: Number,
+            nullable: false,
         },
     },
     orderBy: {

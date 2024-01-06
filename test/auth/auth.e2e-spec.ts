@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -9,7 +10,7 @@ import { GenericContainer, StartedTestContainer } from 'testcontainers';
 import { AppModule } from '../../src/app.module';
 import { ValidationTransformPipe } from '../../src/infra/rest/pipes/validation-transform.pipe';
 
-describe('AppController (e2e)', () => {
+describe('Auth (e2e)', () => {
     let app: INestApplication;
     let container: StartedTestContainer;
 

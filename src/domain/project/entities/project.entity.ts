@@ -13,7 +13,7 @@ export class ProjectEntity {
 
     public userId: number;
 
-    public projectId: string;
+    public publicId: string;
 
     public projectEntries: ProjectEntryEntity[];
 
