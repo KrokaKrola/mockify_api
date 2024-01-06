@@ -1,4 +1,4 @@
-export class CreateProjectEntryResponse {
+export class UpdateResourceResponse {
     constructor(id: number, name: string) {
         this.id = id;
         this.name = name;

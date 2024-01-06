@@ -6,63 +6,63 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import type { Request } from 'express';
 
-import { CreateProjectEntryAction } from '../../../application/project/actions/create-project-entry.action';
 import { CreateProjectAction } from '../../../application/project/actions/create-project.action';
-import { DeleteProjectEntryAction } from '../../../application/project/actions/delete-project-entry.action';
+import { CreateResourceAction } from '../../../application/project/actions/create-resource.action';
 import { DeleteProjectAction } from '../../../application/project/actions/delete-project.action';
-import { GetProjectEntriesAction } from '../../../application/project/actions/get-project-entries.action';
+import { DeleteResourceAction } from '../../../application/project/actions/delete-resource.action';
 import { GetProjectsAction } from '../../../application/project/actions/get-projects.action';
-import { UpdateProjectEntryAction } from '../../../application/project/actions/update-project-entry.action';
+import { GetResourcesAction } from '../../../application/project/actions/get-resources.action';
 import { UpdateProjectAction } from '../../../application/project/actions/update-project.action';
-import { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import { UpdateResourceAction } from '../../../application/project/actions/update-resource.action';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
 import { PostgresModule } from '../../../infra/database/postgres/postgres.module';
-import { ProjectEntryRepository } from '../../../infra/database/postgres/repositories/project-entry.repository';
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ResourceRepository } from '../../../infra/database/postgres/repositories/resource.repository';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { AppConfigModule } from '../../../infra/ioc/app-config/app-config.module';
-import { CreateEntryRequest } from '../../requests/project/create-entry.request';
 import { CreateProjectRequest } from '../../requests/project/create-project.request';
-import { UpdateProjectEntryRequest } from '../../requests/project/update-project-entry.request';
+import { CreateResourceRequest } from '../../requests/project/create-resource.request';
 import { UpdateProjectRequest } from '../../requests/project/update-project.request';
-import { CreateProjectEntryResponse } from '../../responses/project/create-project-entry.response';
+import { UpdateResourceRequest } from '../../requests/project/update-resource.request';
 import { CreateProjectResponse } from '../../responses/project/create-project.response';
+import { CreateResourceResponse } from '../../responses/project/create-resource.response';
 import { UpdateProjectResponse } from '../../responses/project/update-project.response';
 import { ProjectsController } from '../projects.controller';
 
 describe('ProjectsController', () => {
     let controller: ProjectsController;
     let projectsRepository: ProjectRepository;
-    let projectEntryRepository: ProjectEntryRepository;
+    let projectEntryRepository: ResourceRepository;
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [
                 AppConfigModule,
                 PostgresModule,
-                TypeOrmModule.forFeature([ProjectEntity, ProjectEntryEntity]),
+                TypeOrmModule.forFeature([ProjectEntity, ResourceEntity]),
             ],
             controllers: [ProjectsController],
             providers: [
                 ProjectRepository,
-                ProjectEntryRepository,
+                ResourceRepository,
                 CreateProjectAction,
                 UpdateProjectAction,
                 DeleteProjectAction,
                 GetProjectsAction,
-                CreateProjectEntryAction,
-                GetProjectEntriesAction,
-                UpdateProjectEntryAction,
-                DeleteProjectEntryAction,
+                CreateResourceAction,
+                GetResourcesAction,
+                UpdateResourceAction,
+                DeleteResourceAction,
                 ConfigService,
             ],
         }).compile();
 
         controller = moduleRef.get<ProjectsController>(ProjectsController);
         projectsRepository = moduleRef.get<ProjectRepository>(ProjectRepository);
-        projectEntryRepository = moduleRef.get<ProjectEntryRepository>(ProjectEntryRepository);
+        projectEntryRepository = moduleRef.get<ResourceRepository>(ResourceRepository);
     });
 
     afterEach(() => {
@@ -248,7 +248,7 @@ describe('ProjectsController', () => {
         it('should create an entry', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
 
-            const newEntry = new ProjectEntryEntity('Entry 2', project.id);
+            const newEntry = new ResourceEntity('Entry 2', project.id);
 
             project.projectEntries = [];
 
@@ -266,7 +266,7 @@ describe('ProjectsController', () => {
                 user: { id: project.userId },
             } as Request);
 
-            expect(response).toEqual(new CreateProjectEntryResponse(newEntry.id, newEntry.name));
+            expect(response).toEqual(new CreateResourceResponse(newEntry.id, newEntry.name));
         });
 
         it('should throw an error if project does not exist', async () => {
@@ -274,7 +274,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(null);
             });
 
-            const dto = new CreateEntryRequest('Entry 1');
+            const dto = new CreateResourceRequest('Entry 1');
 
             try {
                 await controller.createEntry(dto, 1, { user: { id: 1 } } as Request);
@@ -307,14 +307,14 @@ describe('ProjectsController', () => {
             const project = new ProjectEntity('Project 1', 1, 1);
 
             project.projectEntries = new Array(20).map((_, i) => {
-                return new ProjectEntryEntity(`Entry ${i + 1}`, project.id, i + 1);
+                return new ResourceEntity(`Entry ${i + 1}`, project.id, i + 1);
             });
 
             jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
-            const dto = new CreateEntryRequest('Entry 21');
+            const dto = new CreateResourceRequest('Entry 21');
 
             try {
                 await controller.createEntry(dto, 1, { user: { id: project.userId } } as Request);
@@ -327,7 +327,7 @@ describe('ProjectsController', () => {
 
         it('should throw an error if entry already exists', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry = new ResourceEntity('Entry 1', project.id, 1);
 
             project.projectEntries = [entry];
 
@@ -335,7 +335,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(project);
             });
 
-            const dto = new CreateEntryRequest('Entry 1');
+            const dto = new CreateResourceRequest('Entry 1');
 
             try {
                 await controller.createEntry(dto, 1, { user: { id: project.userId } } as Request);
@@ -350,7 +350,7 @@ describe('ProjectsController', () => {
     describe('getEntries', () => {
         it('should return entries', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry = new ResourceEntity('Entry 1', project.id, 1);
 
             project.projectEntries = [entry];
 
@@ -401,7 +401,7 @@ describe('ProjectsController', () => {
     describe('updateEntry', () => {
         it('should update an entry', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry = new ResourceEntity('Entry 1', project.id, 1);
 
             project.projectEntries = [entry];
 
@@ -409,13 +409,13 @@ describe('ProjectsController', () => {
                 return Promise.resolve(project);
             });
 
-            const updatedEntry = new ProjectEntryEntity('Entry update', project.id, entry.id);
+            const updatedEntry = new ResourceEntity('Entry update', project.id, entry.id);
 
             jest.spyOn(projectEntryRepository, 'update').mockImplementation(() => {
                 return Promise.resolve(undefined);
             });
 
-            const dto = new UpdateProjectEntryRequest(updatedEntry.name);
+            const dto = new UpdateResourceRequest(updatedEntry.name);
 
             const response = await controller.updateEntry(dto, 1, 1, {
                 user: { id: project.userId },
@@ -432,7 +432,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(null);
             });
 
-            const dto = new UpdateProjectEntryRequest('Project 1');
+            const dto = new UpdateResourceRequest('Project 1');
 
             try {
                 await controller.updateEntry(dto, 1, 1, { user: { id: 1 } } as Request);
@@ -454,7 +454,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(undefined);
             });
 
-            const dto = new UpdateProjectEntryRequest('Project 1');
+            const dto = new UpdateResourceRequest('Project 1');
 
             try {
                 await controller.updateEntry(dto, 1, 1, {
@@ -469,7 +469,7 @@ describe('ProjectsController', () => {
 
         it('should throw an error if entry does not exist', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry = new ResourceEntity('Entry 1', project.id, 1);
 
             project.projectEntries = [entry];
 
@@ -477,7 +477,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(project);
             });
 
-            const dto = new UpdateProjectEntryRequest('Entry 2');
+            const dto = new UpdateResourceRequest('Entry 2');
 
             try {
                 await controller.updateEntry(dto, 1, 2, { user: { id: 1 } } as Request);
@@ -490,8 +490,8 @@ describe('ProjectsController', () => {
 
         it('should throw an error if entry already exists', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry1 = new ProjectEntryEntity('Entry 1', project.id, 1);
-            const entry2 = new ProjectEntryEntity('Entry 2', project.id, 2);
+            const entry1 = new ResourceEntity('Entry 1', project.id, 1);
+            const entry2 = new ResourceEntity('Entry 2', project.id, 2);
 
             project.projectEntries = [entry1, entry2];
 
@@ -499,8 +499,8 @@ describe('ProjectsController', () => {
                 return Promise.resolve(project);
             });
 
-            const updatedEntry = new ProjectEntryEntity('Entry 2', project.id);
-            const dto = new UpdateProjectEntryRequest(updatedEntry.name);
+            const updatedEntry = new ResourceEntity('Entry 2', project.id);
+            const dto = new UpdateResourceRequest(updatedEntry.name);
 
             try {
                 await controller.updateEntry(dto, project.id, 1, {
@@ -517,7 +517,7 @@ describe('ProjectsController', () => {
     describe('deleteEntry', () => {
         it('should delete an entry', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const entry = new ProjectEntryEntity('Entry 1', project.id, 1);
+            const entry = new ResourceEntity('Entry 1', project.id, 1);
 
             project.projectEntries = [entry];
 

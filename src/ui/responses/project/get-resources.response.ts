@@ -1,4 +1,4 @@
-import type { ProjectEntryEntity } from '../../../domain/project/entities/project-entry.entity';
+import type { ResourceEntity } from '../../../domain/project/entities/resource.entity';
 
 class ProjectEntry {
     constructor(name: string, id: number) {
@@ -11,8 +11,8 @@ class ProjectEntry {
     public id: number;
 }
 
-export class GetProjectEntriesResponse {
-    constructor(entries: ProjectEntryEntity[]) {
+export class GetResourcesResponse {
+    constructor(entries: ResourceEntity[]) {
         this.entries = entries.map((entry) => new ProjectEntry(entry.name, entry.id));
     }
 

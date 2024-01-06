@@ -1,12 +1,12 @@
 import { EntitySchema } from 'typeorm';
 
-import { ProjectEntryFieldsEntity } from '../../../../domain/project/entities/project-entry-fields.entity';
+import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
 import { FieldTypeEnum } from '../../../../domain/project/enums/field-type.enum';
 
-export const ProjectEntryFieldsMapper = new EntitySchema<ProjectEntryFieldsEntity>({
-    name: ProjectEntryFieldsEntity.name,
-    tableName: 'project_entry_fields',
-    target: ProjectEntryFieldsEntity,
+export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
+    name: ResourceFieldEntity.name,
+    tableName: 'resource_fields',
+    target: ResourceFieldEntity,
     columns: {
         id: {
             type: Number,
@@ -25,7 +25,7 @@ export const ProjectEntryFieldsMapper = new EntitySchema<ProjectEntryFieldsEntit
             name: 'value',
             nullable: true,
         },
-        entryId: {
+        resourceId: {
             type: Number,
         },
         createdAt: {
@@ -38,12 +38,13 @@ export const ProjectEntryFieldsMapper = new EntitySchema<ProjectEntryFieldsEntit
         },
     },
     relations: {
-        entry: {
-            type: 'many-to-one',
-            target: 'project_entries',
-            joinColumn: {
-                name: 'entry_id',
-            },
-        },
+        // resource: {
+        //     type: 'many-to-one',
+        //     target: 'project_entries',
+        //     joinColumn: {
+        //         name: 'resource_id',
+        //         referencedColumnName: 'id',
+        //     },
+        // },
     },
 });

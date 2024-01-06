@@ -48,10 +48,13 @@ export const ProjectMapper = new EntitySchema<ProjectEntity>({
         id: 'ASC',
     },
     relations: {
-        projectEntries: {
-            type: 'one-to-many',
-            target: 'ProjectEntryEntity',
-            inverseSide: 'project',
-        },
+        // resources: {
+        //     type: 'one-to-many',
+        //     target: 'ProjectEntryEntity',
+        //     inverseSide: 'project',
+        //     joinColumn: {
+        //         name: 'project_id',
+        //     },
+        // },
     },
 });

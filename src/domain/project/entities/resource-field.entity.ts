@@ -1,7 +1,7 @@
 import type { FieldTypeEnum } from '../enums/field-type.enum';
-import type { ProjectEntryEntity } from './project-entry.entity';
+import type { ResourceEntity } from './resource.entity';
 
-export class ProjectEntryFieldsEntity {
+export class ResourceFieldEntity {
     public id: number;
 
     public name: string;
@@ -10,18 +10,18 @@ export class ProjectEntryFieldsEntity {
 
     public value: string;
 
-    public entryId: number;
+    public resourceId: number;
 
-    public entry: ProjectEntryEntity;
+    public resource: ResourceEntity;
 
     public createdAt: Date;
 
     public updatedAt: Date;
 
-    constructor(name: string, fieldType: FieldTypeEnum, id?: number, entryId?: number) {
+    constructor(name: string, fieldType: FieldTypeEnum, id?: number, resourceId?: number) {
         this.name = name;
         this.fieldType = fieldType;
         this.id = id;
-        this.entryId = entryId;
+        this.resourceId = resourceId;
     }
 }

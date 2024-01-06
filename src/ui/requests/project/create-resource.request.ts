@@ -1,6 +1,6 @@
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
-export class UpdateProjectEntryRequest {
+export class CreateResourceRequest {
     constructor(name: string) {
         this.name = name;
     }

@@ -1,4 +1,4 @@
-import type { ProjectEntryEntity } from './project-entry.entity';
+import type { ResourceEntity } from './resource.entity';
 
 export class ProjectEntity {
     public id: number;
@@ -15,7 +15,7 @@ export class ProjectEntity {
 
     public publicId: string;
 
-    public projectEntries: ProjectEntryEntity[];
+    public resources: ResourceEntity[];
 
     constructor(name: string, userId?: number, id?: number) {
         this.name = name;

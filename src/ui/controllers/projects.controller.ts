@@ -14,26 +14,26 @@ import {
 
 import { Request } from 'express';
 
-import { CreateProjectEntryAction } from '../../application/project/actions/create-project-entry.action';
 import { CreateProjectAction } from '../../application/project/actions/create-project.action';
-import { DeleteProjectEntryAction } from '../../application/project/actions/delete-project-entry.action';
+import { CreateResourceAction } from '../../application/project/actions/create-resource.action';
 import { DeleteProjectAction } from '../../application/project/actions/delete-project.action';
-import { GetProjectEntriesAction } from '../../application/project/actions/get-project-entries.action';
+import { DeleteResourceAction } from '../../application/project/actions/delete-resource.action';
 import { GetProjectsAction } from '../../application/project/actions/get-projects.action';
-import { UpdateProjectEntryAction } from '../../application/project/actions/update-project-entry.action';
+import { GetResourcesAction } from '../../application/project/actions/get-resources.action';
 import { UpdateProjectAction } from '../../application/project/actions/update-project.action';
+import { UpdateResourceAction } from '../../application/project/actions/update-resource.action';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
-import { CreateEntryRequest } from '../requests/project/create-entry.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
-import { UpdateProjectEntryRequest } from '../requests/project/update-project-entry.request';
+import { CreateResourceRequest } from '../requests/project/create-resource.request';
 import { UpdateProjectRequest } from '../requests/project/update-project.request';
+import { UpdateResourceRequest } from '../requests/project/update-resource.request';
 
-import type { CreateProjectEntryResponse } from '../responses/project/create-project-entry.response';
 import type { CreateProjectResponse } from '../responses/project/create-project.response';
-import type { GetProjectEntriesResponse } from '../responses/project/get-project-entries.response';
+import type { CreateResourceResponse } from '../responses/project/create-resource.response';
 import type { GetProjectsResponse } from '../responses/project/get-projects.response';
-import type { UpdateProjectEntryResponse } from '../responses/project/update-project-entry.response';
+import type { GetResourcesResponse } from '../responses/project/get-resources.response';
 import type { UpdateProjectResponse } from '../responses/project/update-project.response';
+import type { UpdateResourceResponse } from '../responses/project/update-resource.response';
 
 @Controller('projects')
 @UseGuards(AccessTokenGuard)
@@ -43,10 +43,10 @@ export class ProjectsController {
         private readonly updateProjectAction: UpdateProjectAction,
         private readonly deleteProjectAction: DeleteProjectAction,
         private readonly getProjectsAction: GetProjectsAction,
-        private readonly createProjectEntryAction: CreateProjectEntryAction,
-        private readonly getProjectEntries: GetProjectEntriesAction,
-        private readonly updateProjectEntryAction: UpdateProjectEntryAction,
-        private readonly deleteProjectEntryAction: DeleteProjectEntryAction,
+        private readonly createResourceAction: CreateResourceAction,
+        private readonly getResourcesAction: GetResourcesAction,
+        private readonly updateResourceAction: UpdateResourceAction,
+        private readonly deleteResourceAction: DeleteResourceAction,
     ) {}
 
     @Get()
@@ -76,40 +76,40 @@ export class ProjectsController {
         return this.deleteProjectAction.execute(id);
     }
 
-    @Post(':id/entries')
+    @Post(':id/resources')
     public async createEntry(
-        @Body() dto: CreateEntryRequest,
+        @Body() dto: CreateResourceRequest,
         @Param() id: number,
         @Req() req: Request,
-    ): Promise<CreateProjectEntryResponse> {
-        return this.createProjectEntryAction.execute(dto, req.user.id, id);
+    ): Promise<CreateResourceResponse> {
+        return this.createResourceAction.execute(dto, req.user.id, id);
     }
 
-    @Get(':id/entries')
+    @Get(':id/resources')
     public async getEntries(
         @Param('id') id: number,
         @Req() req: Request,
-    ): Promise<GetProjectEntriesResponse> {
-        return this.getProjectEntries.execute(id, req.user.id);
+    ): Promise<GetResourcesResponse> {
+        return this.getResourcesAction.execute(id, req.user.id);
     }
 
-    @Patch(':id/entries/:entryId')
+    @Patch(':id/resources/:resourceId')
     public async updateEntry(
-        @Body() dto: UpdateProjectEntryRequest,
+        @Body() dto: UpdateResourceRequest,
         @Param('id') projectId: number,
-        @Param('entryId') entryId: number,
+        @Param('resourceId') resourceId: number,
         @Param() req: Request,
-    ): Promise<UpdateProjectEntryResponse> {
-        return this.updateProjectEntryAction.execute(dto, projectId, entryId, req.user.id);
+    ): Promise<UpdateResourceResponse> {
+        return this.updateResourceAction.execute(dto, projectId, resourceId, req.user.id);
     }
 
-    @Delete(':id/entries/:entryId')
+    @Delete(':id/entries/:resourceId')
     @HttpCode(HttpStatus.NO_CONTENT)
     public async deleteEntry(
         @Param('id') projectId: number,
-        @Param('entryId') entryId: number,
+        @Param('resourceId') resourceId: number,
         @Req() req: Request,
     ): Promise<void> {
-        return this.deleteProjectEntryAction.execute(projectId, entryId, req.user.id);
+        return this.deleteResourceAction.execute(projectId, resourceId, req.user.id);
     }
 }

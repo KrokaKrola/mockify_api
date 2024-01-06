@@ -1,12 +1,13 @@
 import { EntitySchema } from 'typeorm';
 
-import { ProjectEntryEntity } from '../../../../domain/project/entities/project-entry.entity';
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
+import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
+import { ResourceEntity } from '../../../../domain/project/entities/resource.entity';
 
-export const ProjectEntryMapper = new EntitySchema<ProjectEntryEntity>({
-    name: ProjectEntryEntity.name,
-    tableName: 'project_entries',
-    target: ProjectEntryEntity,
+export const ResourceMapper = new EntitySchema<ResourceEntity>({
+    name: ResourceEntity.name,
+    tableName: 'resources',
+    target: ResourceEntity,
     columns: {
         id: {
             type: Number,
@@ -46,7 +47,12 @@ export const ProjectEntryMapper = new EntitySchema<ProjectEntryEntity>({
         project: {
             type: 'many-to-one',
             target: ProjectEntity.name,
-            inverseSide: 'projectEntries',
+            inverseSide: 'resources',
+        },
+        fields: {
+            type: 'one-to-many',
+            target: ResourceFieldEntity.name,
+            inverseSide: 'resource',
         },
     },
 });
