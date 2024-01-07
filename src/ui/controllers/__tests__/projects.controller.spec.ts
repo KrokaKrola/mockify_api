@@ -10,6 +10,7 @@ import { CreateProjectAction } from '../../../application/project/actions/projec
 import { DeleteProjectAction } from '../../../application/project/actions/project/delete-project.action';
 import { GetProjectsAction } from '../../../application/project/actions/project/get-projects.action';
 import { UpdateProjectAction } from '../../../application/project/actions/project/update-project.action';
+import { CreateFieldAction } from '../../../application/project/actions/resource-field/create-field.action';
 import { CreateResourceAction } from '../../../application/project/actions/resource/create-resource.action';
 import { DeleteResourceAction } from '../../../application/project/actions/resource/delete-resource.action';
 import { GetResourcesAction } from '../../../application/project/actions/resource/get-resources.action';
@@ -57,6 +58,7 @@ describe('ProjectsController', () => {
                 UpdateResourceAction,
                 DeleteResourceAction,
                 ConfigService,
+                CreateFieldAction,
             ],
         }).compile();
 
@@ -194,22 +196,6 @@ describe('ProjectsController', () => {
                 new UpdateProjectResponse(project.publicId, updatedProject.name),
             );
         });
-
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(undefined);
-            });
-
-            const dto = new UpdateProjectRequest('Project 1');
-
-            try {
-                await controller.update(dto, 1);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project not found');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
     });
 
     describe('delete', () => {
@@ -227,20 +213,6 @@ describe('ProjectsController', () => {
             await controller.delete(1);
 
             expect(projectsRepository.delete).toHaveBeenCalledWith(project.id);
-        });
-
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(null);
-            });
-
-            try {
-                await controller.delete(1);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project not found');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
         });
     });
 
@@ -262,45 +234,9 @@ describe('ProjectsController', () => {
 
             const dto = new CreateResourceRequest(newResource.name);
 
-            const response = await controller.createResource(dto, 1, {
-                user: { id: project.userId },
-            } as Request);
+            const response = await controller.createResource(dto, 1);
 
             expect(response).toEqual(new CreateResourceResponse(newResource.id, newResource.name));
-        });
-
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(null);
-            });
-
-            const dto = new CreateResourceRequest('Resource 1');
-
-            try {
-                await controller.createResource(dto, 1, { user: { id: 1 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
-
-        it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            const dto = { name: 'Resource 1' };
-
-            try {
-                await controller.createResource(dto, 1, { user: { id: 2 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
         });
 
         it('should throw an error if project already has 20 resources', async () => {
@@ -317,9 +253,7 @@ describe('ProjectsController', () => {
             const dto = new CreateResourceRequest('Resource 21');
 
             try {
-                await controller.createResource(dto, 1, {
-                    user: { id: project.userId },
-                } as Request);
+                await controller.createResource(dto, 1);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Maximum number of resources reached');
@@ -340,9 +274,7 @@ describe('ProjectsController', () => {
             const dto = new CreateResourceRequest('Resource 1');
 
             try {
-                await controller.createResource(dto, 1, {
-                    user: { id: project.userId },
-                } as Request);
+                await controller.createResource(dto, 1);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Resource with this name already exists');
@@ -362,58 +294,27 @@ describe('ProjectsController', () => {
                 return Promise.resolve(project);
             });
 
-            const response = await controller.getResources(1, {
-                user: { id: project.userId },
-            } as Request);
+            const response = await controller.getResources(1);
 
             expect(response).toEqual({
                 resources: [{ id: resource.id, name: resource.name }],
             });
         });
-
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(null);
-            });
-
-            try {
-                await controller.getResources(1, { user: { id: 1 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
-
-        it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            try {
-                await controller.getResources(1, { user: { id: 2 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
     });
 
     describe('updateResource', () => {
         it('should update an resource', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, 1);
+            const resource = new ResourceEntity('Resource 1', 1, 1);
 
-            project.resources = [resource];
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
+            jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
+                return Promise.resolve(resource);
             });
 
-            const updatedResource = new ResourceEntity('Resource update', project.id, resource.id);
+            jest.spyOn(resourceRepository, 'findByName').mockImplementation(() => {
+                return Promise.resolve(null);
+            });
+
+            const updatedResource = new ResourceEntity('Resource update', 1, resource.id);
 
             jest.spyOn(resourceRepository, 'update').mockImplementation(() => {
                 return Promise.resolve(undefined);
@@ -421,9 +322,7 @@ describe('ProjectsController', () => {
 
             const dto = new UpdateResourceRequest(updatedResource.name);
 
-            const response = await controller.updateResource(dto, 1, 1, {
-                user: { id: project.userId },
-            } as Request);
+            const response = await controller.updateResource(dto, 1);
 
             expect(response).toEqual({
                 id: resource.id,
@@ -431,85 +330,23 @@ describe('ProjectsController', () => {
             });
         });
 
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(null);
-            });
-
-            const dto = new UpdateResourceRequest('Project 1');
-
-            try {
-                await controller.updateResource(dto, 1, 1, { user: { id: 1 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
-
-        it('should throw an error if user does not own the project', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            jest.spyOn(resourceRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(undefined);
-            });
-
-            const dto = new UpdateResourceRequest('Project 1');
-
-            try {
-                await controller.updateResource(dto, 1, 1, {
-                    user: { id: 2 },
-                } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
-
-        it('should throw an error if resource does not exist', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, 1);
-
-            project.resources = [resource];
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            const dto = new UpdateResourceRequest('Resource 2');
-
-            try {
-                await controller.updateResource(dto, 1, 2, { user: { id: 1 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Resource with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
-        });
-
         it('should throw an error if resource already exists', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const resource1 = new ResourceEntity('Resource 1', project.id, 1);
-            const resource2 = new ResourceEntity('Resource 2', project.id, 2);
+            const resource1 = new ResourceEntity('Resource 1', 1, 1);
+            const resource2 = new ResourceEntity('Resource 2', 1, 2);
 
-            project.resources = [resource1, resource2];
-
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(project);
+            jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
+                return Promise.resolve(resource1);
             });
 
-            const updatedResource = new ResourceEntity('Resource 2', project.id);
+            const updatedResource = new ResourceEntity('Resource 2', 1);
             const dto = new UpdateResourceRequest(updatedResource.name);
 
+            jest.spyOn(resourceRepository, 'findByName').mockImplementation(() => {
+                return Promise.resolve(resource2);
+            });
+
             try {
-                await controller.updateResource(dto, project.id, 1, {
-                    user: { id: project.userId },
-                } as Request);
+                await controller.updateResource(dto, resource1.id);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Resource with this name already exists');
@@ -533,23 +370,9 @@ describe('ProjectsController', () => {
                 return Promise.resolve(undefined);
             });
 
-            await controller.deleteResource(1, 1, { user: { id: project.userId } } as Request);
+            await controller.deleteResource(1);
 
             expect(resourceRepository.delete).toHaveBeenCalledWith(resource.id);
-        });
-
-        it('should throw an error if project does not exist', async () => {
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
-                return Promise.resolve(null);
-            });
-
-            try {
-                await controller.deleteResource(1, 1, { user: { id: 1 } } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(404);
-                expect(error.message).toEqual('Project with this id does not exist');
-                expect(error).toBeInstanceOf(ResourceNotFoundException);
-            }
         });
 
         it('should throw an error if user does not own the project', async () => {
@@ -564,7 +387,7 @@ describe('ProjectsController', () => {
             });
 
             try {
-                await controller.deleteResource(1, 1, { user: { id: 2 } } as Request);
+                await controller.deleteResource(1);
             } catch (error) {
                 expect(error.status).toEqual(404);
                 expect(error.message).toEqual('Project with this id does not exist');

@@ -14,9 +14,9 @@ export class UpdateResourceAction {
         dto: UpdateResourceRequest,
         resourceId: number,
     ): Promise<UpdateResourceResponse> {
-        const resource = await this.resourceRepository.findResourceById(resourceId);
+        const resource = await this.resourceRepository.findById(resourceId);
 
-        const existingResource = await this.resourceRepository.findResourceByName(dto.name);
+        const existingResource = await this.resourceRepository.findByName(dto.name);
 
         if (existingResource) {
             throw new ResourceExistsException('Resource with this name already exists');

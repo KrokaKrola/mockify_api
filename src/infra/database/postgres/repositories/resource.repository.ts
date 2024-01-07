@@ -18,14 +18,14 @@ export class ResourceRepository extends Repository<ResourceEntity> {
         super(repository.target, repository.manager, repository.queryRunner);
     }
 
-    public async findResourceById(
+    public async findById(
         id: number,
         relations?: FindOneOptions<ResourceEntity>['relations'],
     ): Promise<ResourceEntity> {
         return this.findOne({ where: { id }, relations });
     }
 
-    public async findResourceByName(name: string): Promise<ResourceEntity> {
+    public async findByName(name: string): Promise<ResourceEntity> {
         return this.findOne({ where: { name } });
     }
 }
