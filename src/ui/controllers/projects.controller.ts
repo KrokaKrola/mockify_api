@@ -14,20 +14,22 @@ import {
 
 import { Request } from 'express';
 
-import { CreateProjectAction } from '../../application/project/actions/create-project.action';
-import { CreateResourceAction } from '../../application/project/actions/create-resource.action';
-import { DeleteProjectAction } from '../../application/project/actions/delete-project.action';
-import { DeleteResourceAction } from '../../application/project/actions/delete-resource.action';
-import { GetProjectsAction } from '../../application/project/actions/get-projects.action';
-import { GetResourcesAction } from '../../application/project/actions/get-resources.action';
-import { UpdateProjectAction } from '../../application/project/actions/update-project.action';
-import { UpdateResourceAction } from '../../application/project/actions/update-resource.action';
+import { CreateProjectAction } from '../../application/project/actions/project/create-project.action';
+import { DeleteProjectAction } from '../../application/project/actions/project/delete-project.action';
+import { GetProjectsAction } from '../../application/project/actions/project/get-projects.action';
+import { UpdateProjectAction } from '../../application/project/actions/project/update-project.action';
+import { CreateResourceAction } from '../../application/project/actions/resource/create-resource.action';
+import { DeleteResourceAction } from '../../application/project/actions/resource/delete-resource.action';
+import { GetResourcesAction } from '../../application/project/actions/resource/get-resources.action';
+import { UpdateResourceAction } from '../../application/project/actions/resource/update-resource.action';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
+import { CreateFieldRequest } from '../requests/project/create-field.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
 import { CreateResourceRequest } from '../requests/project/create-resource.request';
 import { UpdateProjectRequest } from '../requests/project/update-project.request';
 import { UpdateResourceRequest } from '../requests/project/update-resource.request';
 
+import type { CreateFieldResponse } from '../responses/project/create-field.response';
 import type { CreateProjectResponse } from '../responses/project/create-project.response';
 import type { CreateResourceResponse } from '../responses/project/create-resource.response';
 import type { GetProjectsResponse } from '../responses/project/get-projects.response';
@@ -47,6 +49,7 @@ export class ProjectsController {
         private readonly getResourcesAction: GetResourcesAction,
         private readonly updateResourceAction: UpdateResourceAction,
         private readonly deleteResourceAction: DeleteResourceAction,
+        private readonly createFieldAction: CreateFieldAction,
     ) {}
 
     @Get()
@@ -63,6 +66,7 @@ export class ProjectsController {
     }
 
     @Patch(':id')
+    @UseGuards(ProjectOwnershipGuard)
     public async update(
         @Body() dto: UpdateProjectRequest,
         @Param('id') id: number,
@@ -71,45 +75,53 @@ export class ProjectsController {
     }
 
     @Delete(':id')
+    @UseGuards(ProjectOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     public async delete(@Param('id') id: number): Promise<void> {
         return this.deleteProjectAction.execute(id);
     }
 
     @Post(':id/resources')
+    @UseGuards(ProjectOwnershipGuard)
     public async createResource(
         @Body() dto: CreateResourceRequest,
-        @Param() id: number,
-        @Req() req: Request,
+        @Param('id') id: number,
     ): Promise<CreateResourceResponse> {
-        return this.createResourceAction.execute(dto, req.user.id, id);
+        return this.createResourceAction.execute(dto, id);
     }
 
     @Get(':id/resources')
-    public async getResources(
-        @Param('id') id: number,
-        @Req() req: Request,
-    ): Promise<GetResourcesResponse> {
-        return this.getResourcesAction.execute(id, req.user.id);
+    @UseGuards(ProjectOwnershipGuard)
+    public async getResources(@Param('id') id: number): Promise<GetResourcesResponse> {
+        return this.getResourcesAction.execute(id);
     }
 
     @Patch(':id/resources/:resourceId')
+    // TODO: ResourceOwnershipGuard
+    @UseGuards(ProjectOwnershipGuard)
     public async updateResource(
         @Body() dto: UpdateResourceRequest,
-        @Param('id') projectId: number,
         @Param('resourceId') resourceId: number,
-        @Param() req: Request,
     ): Promise<UpdateResourceResponse> {
-        return this.updateResourceAction.execute(dto, projectId, resourceId, req.user.id);
+        return this.updateResourceAction.execute(dto, resourceId);
     }
 
     @Delete(':id/resources/:resourceId')
+    // TODO: ResourceOwnershipGuard
+    @UseGuards(ProjectOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async deleteResource(
-        @Param('id') projectId: number,
+    public async deleteResource(@Param('resourceId') resourceId: number): Promise<void> {
+        return this.deleteResourceAction.execute(resourceId);
+    }
+
+    @Post(':id/resources/:resourceId/fields')
+    @UseGuards(ProjectOwnershipGuard)
+    public async createField(
+        @Body() dto: CreateFieldRequest,
+        @Param('id') projectId: string,
         @Param('resourceId') resourceId: number,
         @Req() req: Request,
-    ): Promise<void> {
-        return this.deleteResourceAction.execute(projectId, resourceId, req.user.id);
+    ): Promise<CreateFieldResponse> {
+        return this.createFieldAction.execute(dto, projectId, resourceId, req.user.id);
     }
 }

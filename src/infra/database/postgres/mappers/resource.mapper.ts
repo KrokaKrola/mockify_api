@@ -1,7 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
-import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../../domain/project/entities/resource.entity';
 
 export const ResourceMapper = new EntitySchema<ResourceEntity>({
@@ -48,11 +47,9 @@ export const ResourceMapper = new EntitySchema<ResourceEntity>({
             type: 'many-to-one',
             target: ProjectEntity.name,
             inverseSide: 'resources',
-        },
-        fields: {
-            type: 'one-to-many',
-            target: ResourceFieldEntity.name,
-            inverseSide: 'resource',
+            joinColumn: {
+                name: 'project_id',
+            },
         },
     },
 });
