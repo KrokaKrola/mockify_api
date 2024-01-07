@@ -8,7 +8,7 @@ export class ResourceFieldEntity {
 
     public fieldType: FieldTypeEnum;
 
-    public value: string;
+    public value: unknown;
 
     public resourceId: number;
 

@@ -19,6 +19,8 @@ import { DeleteProjectAction } from '../../application/project/actions/project/d
 import { GetProjectsAction } from '../../application/project/actions/project/get-projects.action';
 import { UpdateProjectAction } from '../../application/project/actions/project/update-project.action';
 import { CreateFieldAction } from '../../application/project/actions/resource-field/create-field.action';
+import { DeleteFieldAction } from '../../application/project/actions/resource-field/delete-field.action';
+import { UpdateFieldAction } from '../../application/project/actions/resource-field/update-field.action';
 import { CreateResourceAction } from '../../application/project/actions/resource/create-resource.action';
 import { DeleteResourceAction } from '../../application/project/actions/resource/delete-resource.action';
 import { GetResourcesAction } from '../../application/project/actions/resource/get-resources.action';
@@ -29,6 +31,7 @@ import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { CreateFieldRequest } from '../requests/project/create-field.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
 import { CreateResourceRequest } from '../requests/project/create-resource.request';
+import { UpdateFieldRequest } from '../requests/project/update-field.request';
 import { UpdateProjectRequest } from '../requests/project/update-project.request';
 import { UpdateResourceRequest } from '../requests/project/update-resource.request';
 
@@ -37,6 +40,7 @@ import type { CreateProjectResponse } from '../responses/project/create-project.
 import type { CreateResourceResponse } from '../responses/project/create-resource.response';
 import type { GetProjectsResponse } from '../responses/project/get-projects.response';
 import type { GetResourcesResponse } from '../responses/project/get-resources.response';
+import type { UpdateFieldResponse } from '../responses/project/update-field.response';
 import type { UpdateProjectResponse } from '../responses/project/update-project.response';
 import type { UpdateResourceResponse } from '../responses/project/update-resource.response';
 
@@ -53,6 +57,8 @@ export class ProjectsController {
         private readonly updateResourceAction: UpdateResourceAction,
         private readonly deleteResourceAction: DeleteResourceAction,
         private readonly createFieldAction: CreateFieldAction,
+        private readonly updateFieldAction: UpdateFieldAction,
+        private readonly deleteFieldAction: DeleteFieldAction,
     ) {}
 
     @Get()
@@ -122,5 +128,25 @@ export class ProjectsController {
         @Param('resourceId') resourceId: number,
     ): Promise<CreateFieldResponse> {
         return this.createFieldAction.execute(dto, resourceId);
+    }
+
+    @Patch(':id/resources/:resourceId/fields/:fieldId')
+    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
+    public async updateField(
+        @Body() dto: UpdateFieldRequest,
+        @Param('fieldId') fieldId: number,
+        @Param('resourceId') resourceId: number,
+    ): Promise<UpdateFieldResponse> {
+        return this.updateFieldAction.execute(dto, resourceId, fieldId);
+    }
+
+    @Delete(':id/resources/:resourceId/fields/:fieldId')
+    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    public async deleteField(
+        @Param('fieldId') fieldId: number,
+        @Param('resourceId') resourceId: number,
+    ): Promise<void> {
+        return this.deleteFieldAction.execute(resourceId, fieldId);
     }
 }
