@@ -77,7 +77,7 @@ export class ProjectsController {
     }
 
     @Post(':id/resources')
-    public async createEntry(
+    public async createResource(
         @Body() dto: CreateResourceRequest,
         @Param() id: number,
         @Req() req: Request,
@@ -86,7 +86,7 @@ export class ProjectsController {
     }
 
     @Get(':id/resources')
-    public async getEntries(
+    public async getResources(
         @Param('id') id: number,
         @Req() req: Request,
     ): Promise<GetResourcesResponse> {
@@ -94,7 +94,7 @@ export class ProjectsController {
     }
 
     @Patch(':id/resources/:resourceId')
-    public async updateEntry(
+    public async updateResource(
         @Body() dto: UpdateResourceRequest,
         @Param('id') projectId: number,
         @Param('resourceId') resourceId: number,
@@ -103,9 +103,9 @@ export class ProjectsController {
         return this.updateResourceAction.execute(dto, projectId, resourceId, req.user.id);
     }
 
-    @Delete(':id/entries/:resourceId')
+    @Delete(':id/resources/:resourceId')
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async deleteEntry(
+    public async deleteResource(
         @Param('id') projectId: number,
         @Param('resourceId') resourceId: number,
         @Req() req: Request,

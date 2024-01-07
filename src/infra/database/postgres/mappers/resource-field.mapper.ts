@@ -1,5 +1,6 @@
 import { EntitySchema } from 'typeorm';
 
+import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
 import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
 import { FieldTypeEnum } from '../../../../domain/project/enums/field-type.enum';
 
@@ -38,13 +39,13 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
         },
     },
     relations: {
-        // resource: {
-        //     type: 'many-to-one',
-        //     target: 'project_entries',
-        //     joinColumn: {
-        //         name: 'resource_id',
-        //         referencedColumnName: 'id',
-        //     },
-        // },
+        resource: {
+            type: 'many-to-one',
+            target: ProjectEntity.name,
+            joinColumn: {
+                name: 'resource_id',
+                referencedColumnName: 'id',
+            },
+        },
     },
 });

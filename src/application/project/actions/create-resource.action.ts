@@ -22,7 +22,7 @@ export class CreateResourceAction {
         userId: number,
         projectId: number,
     ): Promise<CreateResourceResponse> {
-        const project = await this.projectRepository.findProjectById(projectId, ['projectEntries']);
+        const project = await this.projectRepository.findProjectById(projectId, ['resources']);
 
         if (!project) {
             throw new ResourceNotFoundException('Project with this id does not exist');
@@ -41,9 +41,9 @@ export class CreateResourceAction {
             throw new ResourceExistsException('Resource with this name already exists');
         }
 
-        const newEntry = new ResourceEntity(dto.name, projectId);
-        const result = await this.resourceRepository.save(newEntry);
+        const newResource = new ResourceEntity(dto.name, projectId);
+        const result = await this.resourceRepository.save(newResource);
 
-        return new CreateResourceResponse(result.id, newEntry.name);
+        return new CreateResourceResponse(result.id, newResource.name);
     }
 }

@@ -31,17 +31,17 @@ export class UpdateResourceAction {
             throw new ResourceNotFoundException('Project with this id does not exist');
         }
 
-        const resource = project.resources.find((projEntry) => projEntry.id === resourceId);
+        const resource = project.resources.find((res) => res.id === resourceId);
 
         if (!resource) {
             throw new ResourceNotFoundException('Resource with this id does not exist');
         }
 
-        const existingEntry = project.resources.find(
+        const existingResource = project.resources.find(
             (e) => e.name === dto.name && e.id !== resourceId,
         );
 
-        if (existingEntry) {
+        if (existingResource) {
             throw new ResourceExistsException('Resource with this name already exists');
         }
 

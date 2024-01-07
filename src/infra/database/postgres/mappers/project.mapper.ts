@@ -1,6 +1,7 @@
 import { EntitySchema } from 'typeorm';
 
 import { ProjectEntity } from '../../../../domain/project/entities/project.entity';
+import { ResourceEntity } from '../../../../domain/project/entities/resource.entity';
 
 export const ProjectMapper = new EntitySchema<ProjectEntity>({
     name: ProjectEntity.name,
@@ -48,13 +49,13 @@ export const ProjectMapper = new EntitySchema<ProjectEntity>({
         id: 'ASC',
     },
     relations: {
-        // resources: {
-        //     type: 'one-to-many',
-        //     target: 'ProjectEntryEntity',
-        //     inverseSide: 'project',
-        //     joinColumn: {
-        //         name: 'project_id',
-        //     },
-        // },
+        resources: {
+            type: 'one-to-many',
+            target: ResourceEntity.name,
+            inverseSide: 'project',
+            joinColumn: {
+                name: 'project_id',
+            },
+        },
     },
 });

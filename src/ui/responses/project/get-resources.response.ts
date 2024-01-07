@@ -1,6 +1,6 @@
 import type { ResourceEntity } from '../../../domain/project/entities/resource.entity';
 
-class ProjectEntry {
+class Resource {
     constructor(name: string, id: number) {
         this.name = name;
         this.id = id;
@@ -12,9 +12,9 @@ class ProjectEntry {
 }
 
 export class GetResourcesResponse {
-    constructor(entries: ResourceEntity[]) {
-        this.entries = entries.map((entry) => new ProjectEntry(entry.name, entry.id));
+    constructor(resources: ResourceEntity[]) {
+        this.resources = resources.map((entry) => new Resource(entry.name, entry.id));
     }
 
-    public entries: ProjectEntry[];
+    public resources: Resource[];
 }

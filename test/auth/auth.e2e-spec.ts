@@ -108,5 +108,6 @@ describe('Auth (e2e)', () => {
 
     afterAll(async () => {
         await container.stop();
+        await app.close();
     });
 });
