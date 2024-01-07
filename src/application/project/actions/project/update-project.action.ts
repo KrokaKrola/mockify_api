@@ -10,7 +10,7 @@ export class UpdateProjectAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(dto: UpdateProjectRequest, id: number): Promise<UpdateProjectResponse> {
-        const project = await this.projectRepository.findProjectById(id);
+        const project = await this.projectRepository.findById(id);
 
         await this.projectRepository.update({ id }, { name: dto.name });
 

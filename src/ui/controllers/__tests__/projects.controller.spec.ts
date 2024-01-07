@@ -75,7 +75,7 @@ describe('ProjectsController', () => {
         it('should return projects', async () => {
             const uuid1 = crypto.randomUUID();
             const uuid2 = crypto.randomUUID();
-            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
                 const proj1 = new ProjectEntity('Project 1', 1, 1);
                 const proj2 = new ProjectEntity('Project 2', 1, 2);
 
@@ -98,7 +98,7 @@ describe('ProjectsController', () => {
 
     describe('create', () => {
         it('should create a project', async () => {
-            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
                 const proj1 = new ProjectEntity('Project 1', 1, 1);
                 const proj2 = new ProjectEntity('Project 2', 1, 2);
 
@@ -127,7 +127,7 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if user already has 5 projects', async () => {
-            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
                 return Promise.resolve(
                     Array(5)
                         .fill(undefined)
@@ -152,7 +152,7 @@ describe('ProjectsController', () => {
         });
 
         it('should throw an error if project already exists', async () => {
-            jest.spyOn(projectsRepository, 'findProjectsByUserId').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
                 return Promise.resolve([
                     new ProjectEntity('Project 1', null, 1),
                     new ProjectEntity('Project 2', null, 2),
@@ -179,7 +179,7 @@ describe('ProjectsController', () => {
             const project = new ProjectEntity('Project 1', 1, 1);
             project.publicId = crypto.randomUUID();
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -202,7 +202,7 @@ describe('ProjectsController', () => {
         it('should delete a project', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -224,7 +224,7 @@ describe('ProjectsController', () => {
 
             project.resources = [];
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -246,7 +246,7 @@ describe('ProjectsController', () => {
                 return new ResourceEntity(`Resource ${i + 1}`, project.id, i + 1);
             });
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -267,7 +267,7 @@ describe('ProjectsController', () => {
 
             project.resources = [resource];
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -290,7 +290,7 @@ describe('ProjectsController', () => {
 
             project.resources = [resource];
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -362,7 +362,7 @@ describe('ProjectsController', () => {
 
             project.resources = [resource];
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 
@@ -378,7 +378,7 @@ describe('ProjectsController', () => {
         it('should throw an error if user does not own the project', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
 
-            jest.spyOn(projectsRepository, 'findProjectById').mockImplementation(() => {
+            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(project);
             });
 

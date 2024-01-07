@@ -16,7 +16,7 @@ export class CreateProjectAction {
         dto: CreateProjectRequest,
         userId: number,
     ): Promise<CreateProjectResponse> {
-        const userProjects = await this.projectRepository.findProjectsByUserId(userId);
+        const userProjects = await this.projectRepository.findByUserId(userId);
 
         if (userProjects.length >= 5) {
             throw new MaximumResourceNumberException('User already has 5 projects', 'user');

@@ -20,7 +20,7 @@ export class CreateResourceAction {
         dto: CreateResourceRequest,
         projectId: number,
     ): Promise<CreateResourceResponse> {
-        const project = await this.projectRepository.findProjectById(projectId, ['resources']);
+        const project = await this.projectRepository.findById(projectId, ['resources']);
 
         if (project.resources.length >= 20) {
             throw new MaximumResourceNumberException('Maximum number of resources reached');

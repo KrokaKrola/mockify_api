@@ -18,11 +18,11 @@ export class ProjectRepository extends Repository<ProjectEntity> {
         super(repository.target, repository.manager, repository.queryRunner);
     }
 
-    public async findProjectsByUserId(userId: number): Promise<ProjectEntity[]> {
+    public async findByUserId(userId: number): Promise<ProjectEntity[]> {
         return this.find({ where: { userId } });
     }
 
-    public async findProjectById(
+    public async findById(
         id: number,
         relations?: FindOneOptions<ProjectEntity>['relations'],
     ): Promise<ProjectEntity> {

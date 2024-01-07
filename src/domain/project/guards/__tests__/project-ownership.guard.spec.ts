@@ -40,7 +40,7 @@ describe('ProjectOwnershipGuard', () => {
             }),
         } as ExecutionContext;
 
-        jest.spyOn(projectRepository, 'findProjectById').mockImplementation(() => {
+        jest.spyOn(projectRepository, 'findById').mockImplementation(() => {
             return Promise.resolve(null);
         });
 
@@ -68,7 +68,7 @@ describe('ProjectOwnershipGuard', () => {
             }),
         } as ExecutionContext;
 
-        jest.spyOn(projectRepository, 'findProjectById').mockImplementation(() => {
+        jest.spyOn(projectRepository, 'findById').mockImplementation(() => {
             return Promise.resolve(new ProjectEntity('Project', 1));
         });
 

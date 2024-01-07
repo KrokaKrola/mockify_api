@@ -8,7 +8,7 @@ export class GetResourcesAction {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
     public async execute(projectId: number): Promise<GetResourcesResponse> {
-        const project = await this.projectRepository.findProjectById(projectId, ['resources']);
+        const project = await this.projectRepository.findById(projectId, ['resources']);
 
         return new GetResourcesResponse(project.resources);
     }
