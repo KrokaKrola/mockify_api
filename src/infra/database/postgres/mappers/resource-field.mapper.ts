@@ -20,6 +20,7 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
         fieldType: {
             type: 'enum',
             enum: Object.keys(FieldTypeEnum),
+            name: 'field_type',
         },
         value: {
             type: 'jsonb',
@@ -28,13 +29,16 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
         },
         resourceId: {
             type: Number,
+            name: 'resource_id',
         },
         createdAt: {
-            type: Date,
+            name: 'created_at',
+            type: 'timestamp with time zone',
             createDate: true,
         },
         updatedAt: {
-            type: Date,
+            name: 'updated_at',
+            type: 'timestamp with time zone',
             updateDate: true,
         },
     },
@@ -42,6 +46,7 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
         resource: {
             type: 'many-to-one',
             target: ProjectEntity.name,
+            inverseSide: 'fields',
             joinColumn: {
                 name: 'resource_id',
                 referencedColumnName: 'id',
