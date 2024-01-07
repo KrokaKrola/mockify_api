@@ -18,10 +18,12 @@ import { CreateProjectAction } from '../../application/project/actions/project/c
 import { DeleteProjectAction } from '../../application/project/actions/project/delete-project.action';
 import { GetProjectsAction } from '../../application/project/actions/project/get-projects.action';
 import { UpdateProjectAction } from '../../application/project/actions/project/update-project.action';
+import { CreateFieldAction } from '../../application/project/actions/resource-field/create-field.action';
 import { CreateResourceAction } from '../../application/project/actions/resource/create-resource.action';
 import { DeleteResourceAction } from '../../application/project/actions/resource/delete-resource.action';
 import { GetResourcesAction } from '../../application/project/actions/resource/get-resources.action';
 import { UpdateResourceAction } from '../../application/project/actions/resource/update-resource.action';
+import { ProjectOwnershipGuard } from '../../domain/project/guards/project-ownership.guard';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { CreateFieldRequest } from '../requests/project/create-field.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
