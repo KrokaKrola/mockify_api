@@ -53,9 +53,7 @@ export const ProjectMapper = new EntitySchema<ProjectEntity>({
             type: 'one-to-many',
             target: ResourceEntity.name,
             inverseSide: 'project',
-            joinColumn: {
-                name: 'project_id',
-            },
+            cascade: true,
         },
     },
 });

@@ -15,4 +15,16 @@ export class ResourceRepository extends Repository<ResourceEntity> {
     ) {
         super(repository.target, repository.manager, repository.queryRunner);
     }
+
+    public async findProjectResources(projectId: number): Promise<ResourceEntity[]> {
+        return this.find({ where: { projectId } });
+    }
+
+    public async findResourceById(id: number): Promise<ResourceEntity> {
+        return this.findOne({ where: { id } });
+    }
+
+    public async findResourceByName(name: string): Promise<ResourceEntity> {
+        return this.findOne({ where: { name } });
+    }
 }
