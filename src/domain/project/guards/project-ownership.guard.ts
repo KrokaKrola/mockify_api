@@ -18,11 +18,11 @@ export class ProjectOwnershipGuard implements CanActivate {
         const project = await this.projectRepository.findProjectById(+projectId);
 
         if (!project) {
-            throw new ResourceNotFoundException('Project not found');
+            throw new ResourceNotFoundException('Project not found (1)');
         }
 
         if (project.userId !== userId) {
-            throw new ResourceNotFoundException('Project not found');
+            throw new ResourceNotFoundException('Project not found (2)');
         }
 
         return true;

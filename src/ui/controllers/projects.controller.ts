@@ -24,6 +24,7 @@ import { DeleteResourceAction } from '../../application/project/actions/resource
 import { GetResourcesAction } from '../../application/project/actions/resource/get-resources.action';
 import { UpdateResourceAction } from '../../application/project/actions/resource/update-resource.action';
 import { ProjectOwnershipGuard } from '../../domain/project/guards/project-ownership.guard';
+import { ResourceOwnershipGuard } from '../../domain/project/guards/resource-ownership.guard';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { CreateFieldRequest } from '../requests/project/create-field.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
@@ -99,8 +100,7 @@ export class ProjectsController {
     }
 
     @Patch(':id/resources/:resourceId')
-    // TODO: ResourceOwnershipGuard
-    @UseGuards(ProjectOwnershipGuard)
+    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async updateResource(
         @Body() dto: UpdateResourceRequest,
         @Param('resourceId') resourceId: number,
@@ -109,15 +109,14 @@ export class ProjectsController {
     }
 
     @Delete(':id/resources/:resourceId')
-    // TODO: ResourceOwnershipGuard
-    @UseGuards(ProjectOwnershipGuard)
+    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     public async deleteResource(@Param('resourceId') resourceId: number): Promise<void> {
         return this.deleteResourceAction.execute(resourceId);
     }
 
     @Post(':id/resources/:resourceId/fields')
-    @UseGuards(ProjectOwnershipGuard)
+    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async createField(
         @Body() dto: CreateFieldRequest,
         @Param('id') projectId: string,
