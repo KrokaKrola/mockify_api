@@ -17,8 +17,12 @@ import { GetResourcesAction } from '../../../application/project/actions/resourc
 import { UpdateResourceAction } from '../../../application/project/actions/resource/update-resource.action';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
+import { ProjectMapper } from '../../../infra/database/postgres/mappers/project.mapper';
+import { ResourceFieldMapper } from '../../../infra/database/postgres/mappers/resource-field.mapper';
+import { ResourceMapper } from '../../../infra/database/postgres/mappers/resource.mapper';
 import { PostgresModule } from '../../../infra/database/postgres/postgres.module';
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
+import { ResourceFieldRepository } from '../../../infra/database/postgres/repositories/resource-field.repository';
 import { ResourceRepository } from '../../../infra/database/postgres/repositories/resource.repository';
 import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
@@ -43,7 +47,7 @@ describe('ProjectsController', () => {
             imports: [
                 AppConfigModule,
                 PostgresModule,
-                TypeOrmModule.forFeature([ProjectEntity, ResourceEntity]),
+                TypeOrmModule.forFeature([ProjectMapper, ResourceMapper, ResourceFieldMapper]),
             ],
             controllers: [ProjectsController],
             providers: [
@@ -59,6 +63,7 @@ describe('ProjectsController', () => {
                 DeleteResourceAction,
                 ConfigService,
                 CreateFieldAction,
+                ResourceFieldRepository,
             ],
         }).compile();
 
