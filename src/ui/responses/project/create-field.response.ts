@@ -9,23 +9,10 @@ export class CreateFieldResponse {
 
     public value: unknown;
 
-    public createdAt: Date;
-
-    public updatedAt: Date;
-
-    constructor(
-        id: number,
-        name: string,
-        fieldType: FieldTypeEnum,
-        value: unknown,
-        createdAt: Date,
-        updatedAt: Date,
-    ) {
+    constructor(id: number, name: string, fieldType: FieldTypeEnum, value: unknown) {
         this.id = id;
         this.name = name;
         this.fieldType = fieldType;
         this.value = value;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 }

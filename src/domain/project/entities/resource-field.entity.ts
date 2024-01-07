@@ -18,7 +18,7 @@ export class ResourceFieldEntity {
 
     public updatedAt: Date;
 
-    constructor(name: string, fieldType: FieldTypeEnum, id?: number, resourceId?: number) {
+    constructor(name: string, fieldType: FieldTypeEnum, resourceId?: number, id?: number) {
         this.name = name;
         this.fieldType = fieldType;
         this.id = id;

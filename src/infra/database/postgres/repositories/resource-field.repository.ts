@@ -15,4 +15,12 @@ export class ResourceFieldRepository extends Repository<ResourceFieldEntity> {
     ) {
         super(repository.target, repository.manager, repository.queryRunner);
     }
+
+    public async findByName(name: string): Promise<ResourceFieldEntity> {
+        return this.findOne({ where: { name } });
+    }
+
+    public async findByResourceId(resourceId: number): Promise<ResourceFieldEntity[]> {
+        return this.find({ where: { resourceId } });
+    }
 }

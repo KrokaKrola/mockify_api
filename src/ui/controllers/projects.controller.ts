@@ -119,10 +119,8 @@ export class ProjectsController {
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async createField(
         @Body() dto: CreateFieldRequest,
-        @Param('id') projectId: string,
         @Param('resourceId') resourceId: number,
-        @Req() req: Request,
     ): Promise<CreateFieldResponse> {
-        return this.createFieldAction.execute(dto, projectId, resourceId, req.user.id);
+        return this.createFieldAction.execute(dto, resourceId);
     }
 }
