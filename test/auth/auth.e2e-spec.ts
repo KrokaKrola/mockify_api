@@ -18,7 +18,7 @@ describe('Auth (e2e)', () => {
     let container: StartedTestContainer;
 
     beforeAll(async () => {
-        console.log('Starting PostgreSQL container...');
+        console.log('Starting PostgresSQL container...');
 
         try {
             container = await new GenericContainer('postgres:latest')
