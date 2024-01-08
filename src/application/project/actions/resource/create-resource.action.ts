@@ -40,6 +40,6 @@ export class CreateResourceAction {
 
         const result = await this.resourceRepository.save(newResource);
 
-        return new CreateResourceResponse(result.id, newResource.name);
+        return new CreateResourceResponse(result.id, result.name, result.fields);
     }
 }

@@ -18,7 +18,9 @@ import { DeleteResourceAction } from '../../../application/project/actions/resou
 import { GetResourcesAction } from '../../../application/project/actions/resource/get-resources.action';
 import { UpdateResourceAction } from '../../../application/project/actions/resource/update-resource.action';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
+import { ResourceFieldEntity } from '../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
+import { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
 import { ProjectMapper } from '../../../infra/database/postgres/mappers/project.mapper';
 import { ResourceFieldMapper } from '../../../infra/database/postgres/mappers/resource-field.mapper';
 import { ResourceMapper } from '../../../infra/database/postgres/mappers/resource.mapper';
@@ -36,6 +38,7 @@ import { UpdateProjectRequest } from '../../requests/project/update-project.requ
 import { UpdateResourceRequest } from '../../requests/project/update-resource.request';
 import { CreateProjectResponse } from '../../responses/project/create-project.response';
 import { CreateResourceResponse } from '../../responses/project/create-resource.response';
+import { GetResourcesResponse } from '../../responses/project/get-resources.response';
 import { UpdateProjectResponse } from '../../responses/project/update-project.response';
 import { ProjectsController } from '../projects.controller';
 
@@ -106,7 +109,7 @@ describe('ProjectsController', () => {
     });
 
     describe('create', () => {
-        it.skip('should create a project', async () => {
+        it('should create a project', async () => {
             jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
                 const proj1 = new ProjectEntity('Project 1', 1, 1);
                 const proj2 = new ProjectEntity('Project 2', 1, 2);
@@ -228,8 +231,11 @@ describe('ProjectsController', () => {
     describe('createResource', () => {
         it('should create an resource', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
+            const newResource = new ResourceEntity('Resource 2', project.id, 1);
 
-            const newResource = new ResourceEntity('Resource 2', project.id);
+            newResource.fields = [
+                new ResourceFieldEntity('id', FieldTypeEnum.PRIMARY_KEY, newResource.id, 1),
+            ];
 
             project.resources = [];
 
@@ -242,10 +248,11 @@ describe('ProjectsController', () => {
             });
 
             const dto = new CreateResourceRequest(newResource.name);
-
             const response = await controller.createResource(dto, 1);
 
-            expect(response).toEqual(new CreateResourceResponse(newResource.id, newResource.name));
+            expect(response).toEqual(
+                new CreateResourceResponse(newResource.id, newResource.name, newResource.fields),
+            );
         });
 
         it('should throw an error if project already has 20 resources', async () => {
@@ -293,21 +300,16 @@ describe('ProjectsController', () => {
     });
 
     describe('getResources', () => {
-        it.skip('should return resources', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, 1);
+        it('should return resources', async () => {
+            const resource = new ResourceEntity('Resource 1', 1, 1);
 
-            project.resources = [resource];
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
+            jest.spyOn(resourceRepository, 'findByProjectId').mockImplementation(() => {
+                return Promise.resolve([resource]);
             });
 
             const response = await controller.getResources(1);
 
-            expect(response).toEqual({
-                resources: [{ id: resource.id, name: resource.name }],
-            });
+            expect(response).toEqual(new GetResourcesResponse([resource]));
         });
     });
 
