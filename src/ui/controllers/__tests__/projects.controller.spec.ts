@@ -21,6 +21,7 @@ import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 import { ResourceFieldEntity } from '../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
 import { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
+import { ResourceFieldService } from '../../../domain/project/services/resource-field.service';
 import { ProjectMapper } from '../../../infra/database/postgres/mappers/project.mapper';
 import { ResourceFieldMapper } from '../../../infra/database/postgres/mappers/resource-field.mapper';
 import { ResourceMapper } from '../../../infra/database/postgres/mappers/resource.mapper';
@@ -71,6 +72,7 @@ describe('ProjectsController', () => {
                 ResourceFieldRepository,
                 UpdateFieldAction,
                 DeleteFieldAction,
+                ResourceFieldService,
             ],
         }).compile();
 
