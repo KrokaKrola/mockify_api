@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
+import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../../domain/project/entities/resource.entity';
+import { FieldTypeEnum } from '../../../../domain/project/enums/field-type.enum';
 import { ProjectRepository } from '../../../../infra/database/postgres/repositories/project.repository';
 import { ResourceRepository } from '../../../../infra/database/postgres/repositories/resource.repository';
 import { MaximumResourceNumberException } from '../../../../infra/exceptions/maximum-resource-number.exception';
@@ -32,6 +34,10 @@ export class CreateResourceAction {
         }
 
         const newResource = new ResourceEntity(dto.name, projectId);
+        const primaryColumnField = new ResourceFieldEntity('id', FieldTypeEnum.PRIMARY_KEY);
+
+        newResource.fields = [primaryColumnField];
+
         const result = await this.resourceRepository.save(newResource);
 
         return new CreateResourceResponse(result.id, newResource.name);

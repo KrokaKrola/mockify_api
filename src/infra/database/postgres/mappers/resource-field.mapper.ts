@@ -30,6 +30,7 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
         resourceId: {
             type: Number,
             name: 'resource_id',
+            nullable: true,
         },
         createdAt: {
             name: 'created_at',
