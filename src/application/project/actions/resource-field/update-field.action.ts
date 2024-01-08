@@ -1,29 +1,27 @@
 import { Injectable } from '@nestjs/common';
 
+import { ResourceFieldService } from '../../../../domain/project/services/resource-field.service';
 import { ResourceFieldRepository } from '../../../../infra/database/postgres/repositories/resource-field.repository';
-import { ResourceNotFoundException } from '../../../../infra/exceptions/resource-not-found.exception';
 import { UpdateFieldResponse } from '../../../../ui/responses/project/update-field.response';
 
 import type { UpdateFieldRequest } from '../../../../ui/requests/project/update-field.request';
 
 @Injectable()
 export class UpdateFieldAction {
-    constructor(private readonly resourceFieldRepository: ResourceFieldRepository) {}
+    constructor(
+        private readonly resourceFieldRepository: ResourceFieldRepository,
+        private readonly resourceFieldService: ResourceFieldService,
+    ) {}
 
     public async execute(
         dto: UpdateFieldRequest,
         resourceId: number,
         fieldId: number,
     ): Promise<UpdateFieldResponse> {
-        const field = await this.resourceFieldRepository.findById(fieldId);
-
-        if (!field) {
-            throw new ResourceNotFoundException('Field not found');
-        }
-
-        if (field.resourceId !== resourceId) {
-            throw new ResourceNotFoundException('Field not found');
-        }
+        const field = await this.resourceFieldService.validateAndCheckDeletability(
+            resourceId,
+            fieldId,
+        );
 
         field.name = dto.name;
         field.fieldType = dto.fieldType;

@@ -1,22 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
+import { ResourceFieldService } from '../../../../domain/project/services/resource-field.service';
 import { ResourceFieldRepository } from '../../../../infra/database/postgres/repositories/resource-field.repository';
-import { ResourceNotFoundException } from '../../../../infra/exceptions/resource-not-found.exception';
 
 @Injectable()
 export class DeleteFieldAction {
-    constructor(private readonly resourceFieldRepository: ResourceFieldRepository) {}
+    constructor(
+        private readonly resourceFieldRepository: ResourceFieldRepository,
+        private readonly resourceFieldService: ResourceFieldService,
+    ) {}
 
     public async execute(resourceId: number, fieldId: number): Promise<void> {
-        const field = await this.resourceFieldRepository.findById(fieldId);
-
-        if (!field) {
-            throw new ResourceNotFoundException('Field not found');
-        }
-
-        if (field.resourceId !== resourceId) {
-            throw new ResourceNotFoundException('Field not found');
-        }
+        await this.resourceFieldService.validateAndCheckDeletability(resourceId, fieldId);
 
         await this.resourceFieldRepository.delete(fieldId);
     }
