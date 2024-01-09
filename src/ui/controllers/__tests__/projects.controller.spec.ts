@@ -233,10 +233,15 @@ describe('ProjectsController', () => {
     describe('createResource', () => {
         it('should create an resource', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const newResource = new ResourceEntity('Resource 2', project.id, 1);
+            const newResource = new ResourceEntity('Resource 2', project.id, crypto.randomUUID());
 
             newResource.fields = [
-                new ResourceFieldEntity('id', FieldTypeEnum.PRIMARY_KEY, newResource.id, 1),
+                new ResourceFieldEntity(
+                    'id',
+                    FieldTypeEnum.PRIMARY_KEY,
+                    newResource.id,
+                    crypto.randomUUID(),
+                ),
             ];
 
             project.resources = [];
@@ -253,7 +258,11 @@ describe('ProjectsController', () => {
             const response = await controller.createResource(dto, 1);
 
             expect(response).toEqual(
-                new CreateResourceResponse(newResource.id, newResource.name, newResource.fields),
+                new CreateResourceResponse(
+                    newResource.publicId,
+                    newResource.name,
+                    newResource.fields,
+                ),
             );
         });
 
@@ -261,7 +270,7 @@ describe('ProjectsController', () => {
             const project = new ProjectEntity('Project 1', 1, 1);
 
             project.resources = new Array(20).map((_, i) => {
-                return new ResourceEntity(`Resource ${i + 1}`, project.id, i + 1);
+                return new ResourceEntity(`Resource ${i + 1}`, project.id, '1');
             });
 
             jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
@@ -281,7 +290,7 @@ describe('ProjectsController', () => {
 
         it('should throw an error if resource already exists', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, 1);
+            const resource = new ResourceEntity('Resource 1', project.id, crypto.randomUUID());
 
             project.resources = [resource];
 
@@ -303,7 +312,7 @@ describe('ProjectsController', () => {
 
     describe('getResources', () => {
         it('should return resources', async () => {
-            const resource = new ResourceEntity('Resource 1', 1, 1);
+            const resource = new ResourceEntity('Resource 1', 1, crypto.randomUUID());
 
             jest.spyOn(resourceRepository, 'findByProjectId').mockImplementation(() => {
                 return Promise.resolve([resource]);
@@ -317,9 +326,9 @@ describe('ProjectsController', () => {
 
     describe('updateResource', () => {
         it('should update an resource', async () => {
-            const resource = new ResourceEntity('Resource 1', 1, 1);
+            const resource = new ResourceEntity('Resource 1', 1, crypto.randomUUID());
 
-            jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
+            jest.spyOn(resourceRepository, 'findByPublicId').mockImplementation(() => {
                 return Promise.resolve(resource);
             });
 
@@ -327,7 +336,7 @@ describe('ProjectsController', () => {
                 return Promise.resolve(null);
             });
 
-            const updatedResource = new ResourceEntity('Resource update', 1, resource.id);
+            const updatedResource = new ResourceEntity('Resource update', 1, resource.publicId);
 
             jest.spyOn(resourceRepository, 'update').mockImplementation(() => {
                 return Promise.resolve(undefined);
@@ -335,17 +344,17 @@ describe('ProjectsController', () => {
 
             const dto = new UpdateResourceRequest(updatedResource.name);
 
-            const response = await controller.updateResource(dto, 1);
+            const response = await controller.updateResource(dto, resource.publicId);
 
             expect(response).toEqual({
-                id: resource.id,
+                id: resource.publicId,
                 name: updatedResource.name,
             });
         });
 
         it('should throw an error if resource already exists', async () => {
-            const resource1 = new ResourceEntity('Resource 1', 1, 1);
-            const resource2 = new ResourceEntity('Resource 2', 1, 2);
+            const resource1 = new ResourceEntity('Resource 1', 1, crypto.randomUUID());
+            const resource2 = new ResourceEntity('Resource 2', 1, crypto.randomUUID());
 
             jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
                 return Promise.resolve(resource1);
@@ -359,7 +368,7 @@ describe('ProjectsController', () => {
             });
 
             try {
-                await controller.updateResource(dto, resource1.id);
+                await controller.updateResource(dto, resource1.publicId);
             } catch (error) {
                 expect(error.status).toEqual(409);
                 expect(error.message).toEqual('Resource with this name already exists');
@@ -371,7 +380,7 @@ describe('ProjectsController', () => {
     describe('deleteResource', () => {
         it('should delete an resource', async () => {
             const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, 1);
+            const resource = new ResourceEntity('Resource 1', project.id, crypto.randomUUID());
 
             project.resources = [resource];
 
@@ -383,9 +392,9 @@ describe('ProjectsController', () => {
                 return Promise.resolve(undefined);
             });
 
-            await controller.deleteResource(1);
+            await controller.deleteResource(resource.publicId);
 
-            expect(resourceRepository.delete).toHaveBeenCalledWith(resource.id);
+            expect(resourceRepository.delete).toHaveBeenCalledWith({ publicId: resource.publicId });
         });
 
         it('should throw an error if user does not own the project', async () => {
@@ -400,7 +409,7 @@ describe('ProjectsController', () => {
             });
 
             try {
-                await controller.deleteResource(1);
+                await controller.deleteResource('1');
             } catch (error) {
                 expect(error.status).toEqual(404);
                 expect(error.message).toEqual('Project with this id does not exist');

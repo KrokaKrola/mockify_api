@@ -1,3 +1,5 @@
+import * as crypto from 'node:crypto';
+
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -39,7 +41,7 @@ describe('ResourceOwnershipGuard', () => {
             }),
         } as ExecutionContext;
 
-        jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
+        jest.spyOn(resourceRepository, 'findByPublicId').mockImplementation(() => {
             return Promise.resolve(null);
         });
 
@@ -66,8 +68,8 @@ describe('ResourceOwnershipGuard', () => {
             }),
         } as ExecutionContext;
 
-        jest.spyOn(resourceRepository, 'findById').mockImplementation(() => {
-            return Promise.resolve(new ResourceEntity('resource_1', 2, 1));
+        jest.spyOn(resourceRepository, 'findByPublicId').mockImplementation(() => {
+            return Promise.resolve(new ResourceEntity('resource_1', 2, crypto.randomUUID()));
         });
 
         try {
