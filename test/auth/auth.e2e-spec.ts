@@ -1,59 +1,16 @@
-import { Test } from '@nestjs/testing';
-
-import * as bodyParser from 'body-parser';
-import * as cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import * as request from 'supertest';
-import { GenericContainer } from 'testcontainers';
 
 import type { INestApplication } from '@nestjs/common';
-import type { TestingModule } from '@nestjs/testing';
-import type { StartedTestContainer } from 'testcontainers';
 
-import { AppModule } from '../../src/app.module';
-import { ValidationTransformPipe } from '../../src/infra/rest/pipes/validation-transform.pipe';
+import { E2EUtilsService } from '../utils/e2e-utils.service';
 
 describe('Auth (e2e)', () => {
+    const e2eUtilsService: E2EUtilsService = new E2EUtilsService();
+
     let app: INestApplication;
-    let container: StartedTestContainer;
 
     beforeAll(async () => {
-        console.log('Starting PostgresSQL container...');
-
-        try {
-            container = await new GenericContainer('postgres:latest')
-                .withExposedPorts({
-                    container: 5432,
-                    host: 5435,
-                })
-                .withEnvironment({
-                    POSTGRES_DB: 'mockify_db',
-                    POSTGRES_USER: 'mockify_u',
-                    POSTGRES_PASSWORD: 'mockify_p',
-                })
-                .start();
-
-            console.log('PostgreSQL container started successfully.');
-        } catch (error) {
-            console.error('Error starting PostgreSQL container:', error);
-
-            throw error;
-        }
-    });
-
-    beforeEach(async () => {
-        const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = moduleFixture.createNestApplication();
-
-        app.use(helmet());
-        app.use(cookieParser());
-        app.use(bodyParser.json({ limit: '50mb' }));
-
-        app.useGlobalPipes(new ValidationTransformPipe());
-
+        app = await e2eUtilsService.initApp();
         await app.init();
     });
 
@@ -107,7 +64,6 @@ describe('Auth (e2e)', () => {
     });
 
     afterAll(async () => {
-        await container.stop();
         await app.close();
     });
 });
