@@ -15,8 +15,8 @@ export class UpdateFieldAction {
 
     public async execute(
         dto: UpdateFieldRequest,
-        resourceId: number,
-        fieldId: number,
+        resourceId: string,
+        fieldId: string,
     ): Promise<UpdateFieldResponse> {
         const field = await this.resourceFieldService.validateAndCheckDeletability(
             resourceId,
@@ -27,7 +27,7 @@ export class UpdateFieldAction {
         field.fieldType = dto.fieldType;
         field.value = dto.value;
 
-        await this.resourceFieldRepository.update({ id: fieldId }, field);
+        await this.resourceFieldRepository.update({ publicId: fieldId }, field);
 
         return new UpdateFieldResponse(field.id, field.name, field.fieldType, field.value);
     }

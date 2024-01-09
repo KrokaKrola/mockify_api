@@ -1,10 +1,10 @@
 export class UpdateResourceResponse {
-    constructor(id: number, name: string) {
+    constructor(id: string, name: string) {
         this.id = id;
         this.name = name;
     }
 
-    public id: number;
+    public id: string;
 
     public name: string;
 }

@@ -39,6 +39,12 @@ export const ResourceMapper = new EntitySchema<ResourceEntity>({
             type: Number,
             nullable: false,
         },
+        publicId: {
+            name: 'public_id',
+            type: 'uuid',
+            nullable: false,
+            generated: 'uuid',
+        },
     },
     orderBy: {
         id: 'ASC',

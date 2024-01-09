@@ -12,9 +12,9 @@ export class UpdateResourceAction {
 
     public async execute(
         dto: UpdateResourceRequest,
-        resourceId: number,
+        resourceId: string,
     ): Promise<UpdateResourceResponse> {
-        const resource = await this.resourceRepository.findById(resourceId);
+        const resource = await this.resourceRepository.findByPublicId(resourceId);
 
         const existingResource = await this.resourceRepository.findByName(dto.name);
 
@@ -24,8 +24,8 @@ export class UpdateResourceAction {
 
         resource.name = dto.name;
 
-        await this.resourceRepository.update({ id: resourceId }, resource);
+        await this.resourceRepository.update({ publicId: resourceId }, resource);
 
-        return new UpdateResourceResponse(resource.id, resource.name);
+        return new UpdateResourceResponse(resource.publicId, resource.name);
     }
 }

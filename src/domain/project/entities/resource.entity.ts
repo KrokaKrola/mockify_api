@@ -12,15 +12,18 @@ export class ResourceEntity {
 
     public deletedAt: Date;
 
+    public publicId: string;
+
     public projectId: number;
 
     public project: ProjectEntity;
 
     public fields: ResourceFieldEntity[];
 
-    constructor(name: string, projectId: number, id?: number) {
+    constructor(name: string, projectId: number, publicId?: string, id?: number) {
         this.name = name;
         this.projectId = projectId;
         this.id = id;
+        this.publicId = publicId;
     }
 }

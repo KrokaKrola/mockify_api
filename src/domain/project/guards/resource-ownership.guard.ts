@@ -16,7 +16,7 @@ export class ResourceOwnershipGuard implements CanActivate {
         const { id: projectId } = request.params;
         const { resourceId } = request.params;
 
-        const resource = await this.resourceRepository.findById(+resourceId, ['project']);
+        const resource = await this.resourceRepository.findByPublicId(resourceId, ['project']);
 
         if (!resource) {
             throw new ResourceNotFoundException('Resource not found (1)');

@@ -6,7 +6,7 @@ import { ResourceRepository } from '../../../../infra/database/postgres/reposito
 export class DeleteResourceAction {
     constructor(private readonly resourceRepository: ResourceRepository) {}
 
-    public async execute(resourceId: number): Promise<void> {
-        await this.resourceRepository.delete(resourceId);
+    public async execute(resourceId: string): Promise<void> {
+        await this.resourceRepository.delete({ publicId: resourceId });
     }
 }

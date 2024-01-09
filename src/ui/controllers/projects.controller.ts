@@ -109,7 +109,7 @@ export class ProjectsController {
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async updateResource(
         @Body() dto: UpdateResourceRequest,
-        @Param('resourceId') resourceId: number,
+        @Param('resourceId') resourceId: string,
     ): Promise<UpdateResourceResponse> {
         return this.updateResourceAction.execute(dto, resourceId);
     }
@@ -117,7 +117,7 @@ export class ProjectsController {
     @Delete(':id/resources/:resourceId')
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async deleteResource(@Param('resourceId') resourceId: number): Promise<void> {
+    public async deleteResource(@Param('resourceId') resourceId: string): Promise<void> {
         return this.deleteResourceAction.execute(resourceId);
     }
 
@@ -125,7 +125,7 @@ export class ProjectsController {
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async createField(
         @Body() dto: CreateFieldRequest,
-        @Param('resourceId') resourceId: number,
+        @Param('resourceId') resourceId: string,
     ): Promise<CreateFieldResponse> {
         return this.createFieldAction.execute(dto, resourceId);
     }
@@ -134,8 +134,8 @@ export class ProjectsController {
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async updateField(
         @Body() dto: UpdateFieldRequest,
-        @Param('fieldId') fieldId: number,
-        @Param('resourceId') resourceId: number,
+        @Param('fieldId') fieldId: string,
+        @Param('resourceId') resourceId: string,
     ): Promise<UpdateFieldResponse> {
         return this.updateFieldAction.execute(dto, resourceId, fieldId);
     }
@@ -144,8 +144,8 @@ export class ProjectsController {
     @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     public async deleteField(
-        @Param('fieldId') fieldId: number,
-        @Param('resourceId') resourceId: number,
+        @Param('fieldId') fieldId: string,
+        @Param('resourceId') resourceId: string,
     ): Promise<void> {
         return this.deleteFieldAction.execute(resourceId, fieldId);
     }

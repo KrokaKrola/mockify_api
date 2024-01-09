@@ -42,6 +42,12 @@ export const ResourceFieldMapper = new EntitySchema<ResourceFieldEntity>({
             type: 'timestamp with time zone',
             updateDate: true,
         },
+        publicId: {
+            name: 'public_id',
+            type: 'uuid',
+            generated: 'uuid',
+            nullable: false,
+        },
     },
     relations: {
         resource: {

@@ -2,14 +2,14 @@ import type { ResourceEntity } from '../../../domain/project/entities/resource.e
 import type { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
 
 class Field {
-    constructor(id: number, name: string, fieldType: FieldTypeEnum, value: unknown) {
+    constructor(id: string, name: string, fieldType: FieldTypeEnum, value: unknown) {
         this.id = id;
         this.name = name;
         this.fieldType = fieldType;
         this.value = value;
     }
 
-    public id: number;
+    public id: string;
 
     public name: string;
 
@@ -19,7 +19,7 @@ class Field {
 }
 
 class Resource {
-    constructor(name: string, id: number, fields: Field[]) {
+    constructor(name: string, id: string, fields: Field[]) {
         this.name = name;
         this.id = id;
         this.fields = fields;
@@ -27,7 +27,7 @@ class Resource {
 
     public name: string;
 
-    public id: number;
+    public id: string;
 
     public fields: Field[];
 }
@@ -38,9 +38,10 @@ export class GetResourcesResponse {
             (entry) =>
                 new Resource(
                     entry.name,
-                    entry.id,
+                    entry.publicId,
                     (entry.fields ?? []).map(
-                        (field) => new Field(field.id, field.name, field.fieldType, field.value),
+                        (field) =>
+                            new Field(field.publicId, field.name, field.fieldType, field.value),
                     ),
                 ),
         );

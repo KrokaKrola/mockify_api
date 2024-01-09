@@ -27,4 +27,8 @@ export class ResourceFieldRepository extends Repository<ResourceFieldEntity> {
     public async findById(id: number): Promise<ResourceFieldEntity> {
         return this.findOne({ where: { id } });
     }
+
+    public async findByPublicId(publicId: string): Promise<ResourceFieldEntity> {
+        return this.findOne({ where: { publicId } });
+    }
 }

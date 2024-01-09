@@ -18,10 +18,19 @@ export class ResourceFieldEntity {
 
     public updatedAt: Date;
 
-    constructor(name: string, fieldType: FieldTypeEnum, resourceId?: number, id?: number) {
+    public publicId: string;
+
+    constructor(
+        name: string,
+        fieldType: FieldTypeEnum,
+        resourceId?: number,
+        publicId?: string,
+        id?: number,
+    ) {
         this.name = name;
         this.fieldType = fieldType;
         this.id = id;
         this.resourceId = resourceId;
+        this.publicId = publicId;
     }
 }

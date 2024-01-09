@@ -25,6 +25,13 @@ export class ResourceRepository extends Repository<ResourceEntity> {
         return this.findOne({ where: { id }, relations });
     }
 
+    public async findByPublicId(
+        publicId: string,
+        relations?: FindOneOptions<ResourceEntity>['relations'],
+    ): Promise<ResourceEntity> {
+        return this.findOne({ where: { publicId }, relations });
+    }
+
     public async findByName(name: string): Promise<ResourceEntity> {
         return this.findOne({ where: { name } });
     }
