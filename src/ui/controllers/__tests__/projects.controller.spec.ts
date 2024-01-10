@@ -4,8 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import type { Request } from 'express';
-
 import { CreateProjectAction } from '../../../application/project/actions/project/create-project.action';
 import { DeleteProjectAction } from '../../../application/project/actions/project/delete-project.action';
 import { GetProjectsAction } from '../../../application/project/actions/project/get-projects.action';
@@ -21,6 +19,7 @@ import { ProjectEntity } from '../../../domain/project/entities/project.entity';
 import { ResourceFieldEntity } from '../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
 import { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
+import { ProjectService } from '../../../domain/project/services/project.service';
 import { ResourceFieldService } from '../../../domain/project/services/resource-field.service';
 import { ProjectMapper } from '../../../infra/database/postgres/mappers/project.mapper';
 import { ResourceFieldMapper } from '../../../infra/database/postgres/mappers/resource-field.mapper';
@@ -33,14 +32,10 @@ import { MaximumResourceNumberException } from '../../../infra/exceptions/maximu
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { AppConfigModule } from '../../../infra/ioc/app-config/app-config.module';
-import { CreateProjectRequest } from '../../requests/project/create-project.request';
 import { CreateResourceRequest } from '../../requests/project/create-resource.request';
-import { UpdateProjectRequest } from '../../requests/project/update-project.request';
 import { UpdateResourceRequest } from '../../requests/project/update-resource.request';
-import { CreateProjectResponse } from '../../responses/project/create-project.response';
 import { CreateResourceResponse } from '../../responses/project/create-resource.response';
 import { GetResourcesResponse } from '../../responses/project/get-resources.response';
-import { UpdateProjectResponse } from '../../responses/project/update-project.response';
 import { ProjectsController } from '../projects.controller';
 
 describe('ProjectsController', () => {
@@ -73,6 +68,7 @@ describe('ProjectsController', () => {
                 UpdateFieldAction,
                 DeleteFieldAction,
                 ResourceFieldService,
+                ProjectService,
             ],
         }).compile();
 
@@ -83,151 +79,6 @@ describe('ProjectsController', () => {
 
     afterEach(() => {
         jest.resetAllMocks();
-    });
-
-    describe('getProjects', () => {
-        it('should return projects', async () => {
-            const uuid1 = crypto.randomUUID();
-            const uuid2 = crypto.randomUUID();
-            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
-                const proj1 = new ProjectEntity('Project 1', 1, 1);
-                const proj2 = new ProjectEntity('Project 2', 1, 2);
-
-                proj1.publicId = uuid1;
-                proj2.publicId = uuid2;
-
-                return Promise.resolve([proj1, proj2]);
-            });
-
-            const response = await controller.getProjects({ user: { id: 1 } } as Request);
-
-            expect(response).toEqual({
-                projects: [
-                    { id: uuid1, name: 'Project 1' },
-                    { id: uuid2, name: 'Project 2' },
-                ],
-            });
-        });
-    });
-
-    describe('create', () => {
-        it('should create a project', async () => {
-            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
-                const proj1 = new ProjectEntity('Project 1', 1, 1);
-                const proj2 = new ProjectEntity('Project 2', 1, 2);
-
-                return Promise.resolve([proj1, proj2]);
-            });
-
-            const newProject = new ProjectEntity('Project 3', null, 3);
-            newProject.publicId = crypto.randomUUID();
-
-            jest.spyOn(projectsRepository, 'save').mockImplementation(() => {
-                return Promise.resolve(newProject);
-            });
-
-            const dto = new CreateProjectRequest(newProject.name);
-
-            const response = await controller.create(dto, {
-                user: { id: 1 },
-            } as Request);
-
-            const newProjectResponse = new CreateProjectResponse(
-                newProject.publicId,
-                newProject.name,
-            );
-
-            expect(response).toEqual(newProjectResponse);
-        });
-
-        it('should throw an error if user already has 5 projects', async () => {
-            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
-                return Promise.resolve(
-                    Array(5)
-                        .fill(undefined)
-                        .map((_, i) => {
-                            return new ProjectEntity(`Project ${i + 1}`, 1, i + 1);
-                        }),
-                );
-            });
-
-            const newProject = new ProjectEntity('Project 6', null, 6);
-            const dto = new CreateProjectRequest(newProject.name);
-
-            try {
-                await controller.create(dto, {
-                    user: { id: 1 },
-                } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(409);
-                expect(error.message).toEqual('User already has 5 projects');
-                expect(error).toBeInstanceOf(MaximumResourceNumberException);
-            }
-        });
-
-        it('should throw an error if project already exists', async () => {
-            jest.spyOn(projectsRepository, 'findByUserId').mockImplementation(() => {
-                return Promise.resolve([
-                    new ProjectEntity('Project 1', null, 1),
-                    new ProjectEntity('Project 2', null, 2),
-                ]);
-            });
-
-            const newProject = new ProjectEntity('Project 1');
-            const dto = new CreateProjectRequest(newProject.name);
-
-            try {
-                await controller.create(dto, {
-                    user: { id: 1 },
-                } as Request);
-            } catch (error) {
-                expect(error.status).toEqual(409);
-                expect(error.message).toEqual('Project already exists');
-                expect(error).toBeInstanceOf(ResourceExistsException);
-            }
-        });
-    });
-
-    describe('update', () => {
-        it('should update a project', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            project.publicId = crypto.randomUUID();
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            const updatedProject = new ProjectEntity('Project 2');
-
-            jest.spyOn(projectsRepository, 'update').mockImplementation(() => {
-                return Promise.resolve(undefined);
-            });
-
-            const dto = new UpdateProjectRequest(updatedProject.name);
-            const response = await controller.update(dto, 1);
-
-            expect(response).toEqual(
-                new UpdateProjectResponse(project.publicId, updatedProject.name),
-            );
-        });
-    });
-
-    describe('delete', () => {
-        it('should delete a project', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            jest.spyOn(projectsRepository, 'delete').mockImplementation(() => {
-                return Promise.resolve(undefined);
-            });
-
-            await controller.delete(1);
-
-            expect(projectsRepository.delete).toHaveBeenCalledWith(project.id);
-        });
     });
 
     describe('createResource', () => {

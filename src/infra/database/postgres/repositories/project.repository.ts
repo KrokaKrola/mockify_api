@@ -28,4 +28,11 @@ export class ProjectRepository extends Repository<ProjectEntity> {
     ): Promise<ProjectEntity> {
         return this.findOne({ where: { id }, relations });
     }
+
+    public async findByPublicId(
+        publicId: string,
+        relations?: FindOneOptions<ProjectEntity>['relations'],
+    ): Promise<ProjectEntity> {
+        return this.findOne({ where: { publicId }, relations });
+    }
 }

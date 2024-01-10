@@ -6,6 +6,7 @@ import {
     HttpCode,
     HttpStatus,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Req,
@@ -75,19 +76,18 @@ export class ProjectsController {
     }
 
     @Patch(':id')
-    @UseGuards(ProjectOwnershipGuard)
     public async update(
         @Body() dto: UpdateProjectRequest,
-        @Param('id') id: number,
+        @Param('id', ParseIntPipe) id: number,
+        @Req() req: Request,
     ): Promise<UpdateProjectResponse> {
-        return this.updateProjectAction.execute(dto, id);
+        return this.updateProjectAction.execute(dto, id, req.user.id);
     }
 
     @Delete(':id')
-    @UseGuards(ProjectOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async delete(@Param('id') id: number): Promise<void> {
-        return this.deleteProjectAction.execute(id);
+    public async delete(@Param('id', ParseIntPipe) id: number, @Req() req: Request): Promise<void> {
+        return this.deleteProjectAction.execute(id, req.user.id);
     }
 
     @Post(':id/resources')
