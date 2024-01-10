@@ -94,19 +94,21 @@ export class ProjectsController {
         return this.deleteProjectAction.execute(id, user.id);
     }
 
-    @Post(':id/resources')
-    @UseGuards(ProjectOwnershipGuard)
-    public async createResource(
-        @Body() dto: CreateResourceRequest,
+    @Get(':id/resources')
+    public async getResources(
         @Param('id') id: number,
-    ): Promise<CreateResourceResponse> {
-        return this.createResourceAction.execute(dto, id);
+        @User() user: Request['user'],
+    ): Promise<GetResourcesResponse> {
+        return this.getResourcesAction.execute(id, user.id);
     }
 
-    @Get(':id/resources')
-    @UseGuards(ProjectOwnershipGuard)
-    public async getResources(@Param('id') id: number): Promise<GetResourcesResponse> {
-        return this.getResourcesAction.execute(id);
+    @Post(':id/resources')
+    public async createResource(
+        @Body() dto: CreateResourceRequest,
+        @Param('id', ParseIntPipe) id: number,
+        @User() user: Request['user'],
+    ): Promise<CreateResourceResponse> {
+        return this.createResourceAction.execute(dto, id, user.id);
     }
 
     @Patch(':id/resources/:resourceId')

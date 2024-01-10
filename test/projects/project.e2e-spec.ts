@@ -4,7 +4,7 @@ import type { INestApplication } from '@nestjs/common';
 
 import { E2EUtilsService } from '../utils/e2e-utils.service';
 
-describe('Project resource (e2e)', () => {
+describe('Project (e2e)', () => {
     let app: INestApplication;
     let accessToken: string;
 

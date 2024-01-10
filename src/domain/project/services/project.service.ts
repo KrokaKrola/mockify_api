@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
+import type { FindOneOptions } from 'typeorm';
+
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 
@@ -12,8 +14,9 @@ export class ProjectService {
     public async validateAndCheckDeletability(
         projectId: number,
         userId: number,
+        projectRelations?: FindOneOptions<ProjectEntity>['relations'],
     ): Promise<ProjectEntity> {
-        const project = await this.projectRepository.findById(projectId);
+        const project = await this.projectRepository.findById(projectId, projectRelations);
 
         if (!project) {
             throw new ResourceNotFoundException('Project not found');

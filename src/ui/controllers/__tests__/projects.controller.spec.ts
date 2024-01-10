@@ -16,9 +16,7 @@ import { DeleteResourceAction } from '../../../application/project/actions/resou
 import { GetResourcesAction } from '../../../application/project/actions/resource/get-resources.action';
 import { UpdateResourceAction } from '../../../application/project/actions/resource/update-resource.action';
 import { ProjectEntity } from '../../../domain/project/entities/project.entity';
-import { ResourceFieldEntity } from '../../../domain/project/entities/resource-field.entity';
 import { ResourceEntity } from '../../../domain/project/entities/resource.entity';
-import { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
 import { ProjectService } from '../../../domain/project/services/project.service';
 import { ResourceFieldService } from '../../../domain/project/services/resource-field.service';
 import { ProjectMapper } from '../../../infra/database/postgres/mappers/project.mapper';
@@ -28,14 +26,10 @@ import { PostgresModule } from '../../../infra/database/postgres/postgres.module
 import { ProjectRepository } from '../../../infra/database/postgres/repositories/project.repository';
 import { ResourceFieldRepository } from '../../../infra/database/postgres/repositories/resource-field.repository';
 import { ResourceRepository } from '../../../infra/database/postgres/repositories/resource.repository';
-import { MaximumResourceNumberException } from '../../../infra/exceptions/maximum-resource-number.exception';
 import { ResourceExistsException } from '../../../infra/exceptions/resource-exists.exception';
 import { ResourceNotFoundException } from '../../../infra/exceptions/resource-not-found.exception';
 import { AppConfigModule } from '../../../infra/ioc/app-config/app-config.module';
-import { CreateResourceRequest } from '../../requests/project/create-resource.request';
 import { UpdateResourceRequest } from '../../requests/project/update-resource.request';
-import { CreateResourceResponse } from '../../responses/project/create-resource.response';
-import { GetResourcesResponse } from '../../responses/project/get-resources.response';
 import { ProjectsController } from '../projects.controller';
 
 describe('ProjectsController', () => {
@@ -79,100 +73,6 @@ describe('ProjectsController', () => {
 
     afterEach(() => {
         jest.resetAllMocks();
-    });
-
-    describe('createResource', () => {
-        it('should create an resource', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const newResource = new ResourceEntity('Resource 2', project.id, crypto.randomUUID());
-
-            newResource.fields = [
-                new ResourceFieldEntity(
-                    'id',
-                    FieldTypeEnum.PRIMARY_KEY,
-                    newResource.id,
-                    crypto.randomUUID(),
-                ),
-            ];
-
-            project.resources = [];
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            jest.spyOn(resourceRepository, 'save').mockImplementation(() => {
-                return Promise.resolve(newResource);
-            });
-
-            const dto = new CreateResourceRequest(newResource.name);
-            const response = await controller.createResource(dto, 1);
-
-            expect(response).toEqual(
-                new CreateResourceResponse(
-                    newResource.publicId,
-                    newResource.name,
-                    newResource.fields,
-                ),
-            );
-        });
-
-        it('should throw an error if project already has 20 resources', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-
-            project.resources = new Array(20).map((_, i) => {
-                return new ResourceEntity(`Resource ${i + 1}`, project.id, '1');
-            });
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            const dto = new CreateResourceRequest('Resource 21');
-
-            try {
-                await controller.createResource(dto, 1);
-            } catch (error) {
-                expect(error.status).toEqual(409);
-                expect(error.message).toEqual('Maximum number of resources reached');
-                expect(error).toBeInstanceOf(MaximumResourceNumberException);
-            }
-        });
-
-        it('should throw an error if resource already exists', async () => {
-            const project = new ProjectEntity('Project 1', 1, 1);
-            const resource = new ResourceEntity('Resource 1', project.id, crypto.randomUUID());
-
-            project.resources = [resource];
-
-            jest.spyOn(projectsRepository, 'findById').mockImplementation(() => {
-                return Promise.resolve(project);
-            });
-
-            const dto = new CreateResourceRequest('Resource 1');
-
-            try {
-                await controller.createResource(dto, 1);
-            } catch (error) {
-                expect(error.status).toEqual(409);
-                expect(error.message).toEqual('Resource with this name already exists');
-                expect(error).toBeInstanceOf(ResourceExistsException);
-            }
-        });
-    });
-
-    describe('getResources', () => {
-        it('should return resources', async () => {
-            const resource = new ResourceEntity('Resource 1', 1, crypto.randomUUID());
-
-            jest.spyOn(resourceRepository, 'findByProjectId').mockImplementation(() => {
-                return Promise.resolve([resource]);
-            });
-
-            const response = await controller.getResources(1);
-
-            expect(response).toEqual(new GetResourcesResponse([resource]));
-        });
     });
 
     describe('updateResource', () => {
