@@ -22,12 +22,12 @@ describe('ProjectService', () => {
     });
 
     it('should return exception if project not found', async () => {
-        jest.spyOn(service, 'validateAndCheckDeletability').mockImplementation(() => {
+        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
             return Promise.resolve(null);
         });
 
         try {
-            await service.validateAndCheckDeletability(1, 1);
+            await service.validateAndCheckExistence(1, 1);
         } catch (error) {
             expect(error.status).toBe(404);
             expect(error.message).toBe('Project not found');
@@ -36,12 +36,12 @@ describe('ProjectService', () => {
     });
 
     it('should return exception on modifying project assigned to another user', async () => {
-        jest.spyOn(service, 'validateAndCheckDeletability').mockImplementation(() => {
+        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
             return Promise.resolve(new ProjectEntity('name', 2, 1));
         });
 
         try {
-            await service.validateAndCheckDeletability(1, 1);
+            await service.validateAndCheckExistence(1, 1);
         } catch (error) {
             expect(error.status).toBe(404);
             expect(error.message).toBe('Project not found');

@@ -23,7 +23,7 @@ export class CreateResourceAction {
         projectId: number,
         userId: number,
     ): Promise<CreateResourceResponse> {
-        const project = await this.projectService.validateAndCheckDeletability(projectId, userId, [
+        const project = await this.projectService.validateAndCheckExistence(projectId, userId, [
             'resources',
         ]);
 

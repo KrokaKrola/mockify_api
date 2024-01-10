@@ -18,7 +18,7 @@ export class UpdateFieldAction {
         resourceId: string,
         fieldId: string,
     ): Promise<UpdateFieldResponse> {
-        const field = await this.resourceFieldService.validateAndCheckDeletability(
+        const field = await this.resourceFieldService.validateAndCheckExistence(
             resourceId,
             fieldId,
         );

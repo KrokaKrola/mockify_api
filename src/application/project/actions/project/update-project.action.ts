@@ -18,7 +18,7 @@ export class UpdateProjectAction {
         id: number,
         userId: number,
     ): Promise<UpdateProjectResponse> {
-        const project = await this.projectService.validateAndCheckDeletability(id, userId);
+        const project = await this.projectService.validateAndCheckExistence(id, userId);
 
         await this.projectRepository.update({ id, userId }, { name: dto.name });
 

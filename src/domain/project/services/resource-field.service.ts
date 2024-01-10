@@ -14,7 +14,7 @@ export class ResourceFieldService {
         private readonly resourceRepository: ResourceRepository,
     ) {}
 
-    public async validateAndCheckDeletability(
+    public async validateAndCheckExistence(
         resourceId: string,
         fieldId: string,
     ): Promise<ResourceFieldEntity> {

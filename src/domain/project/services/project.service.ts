@@ -11,7 +11,7 @@ import type { ProjectEntity } from '../entities/project.entity';
 export class ProjectService {
     constructor(private readonly projectRepository: ProjectRepository) {}
 
-    public async validateAndCheckDeletability(
+    public async validateAndCheckExistence(
         projectId: number,
         userId: number,
         projectRelations?: FindOneOptions<ProjectEntity>['relations'],

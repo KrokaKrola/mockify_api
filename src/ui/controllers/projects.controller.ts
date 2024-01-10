@@ -112,19 +112,23 @@ export class ProjectsController {
     }
 
     @Patch(':id/resources/:resourceId')
-    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async updateResource(
         @Body() dto: UpdateResourceRequest,
+        @Param('id', ParseIntPipe) id: number,
         @Param('resourceId') resourceId: string,
+        @User() user: Request['user'],
     ): Promise<UpdateResourceResponse> {
-        return this.updateResourceAction.execute(dto, resourceId);
+        return this.updateResourceAction.execute(dto, id, resourceId, user.id);
     }
 
     @Delete(':id/resources/:resourceId')
-    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async deleteResource(@Param('resourceId') resourceId: string): Promise<void> {
-        return this.deleteResourceAction.execute(resourceId);
+    public async deleteResource(
+        @Param('id', ParseIntPipe) id: number,
+        @Param('resourceId') resourceId: string,
+        @User() user: Request['user'],
+    ): Promise<void> {
+        return this.deleteResourceAction.execute(id, resourceId, user.id);
     }
 
     @Post(':id/resources/:resourceId/fields')

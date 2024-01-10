@@ -11,7 +11,7 @@ export class DeleteFieldAction {
     ) {}
 
     public async execute(resourceId: string, fieldId: string): Promise<void> {
-        await this.resourceFieldService.validateAndCheckDeletability(resourceId, fieldId);
+        await this.resourceFieldService.validateAndCheckExistence(resourceId, fieldId);
 
         await this.resourceFieldRepository.delete({ publicId: fieldId });
     }

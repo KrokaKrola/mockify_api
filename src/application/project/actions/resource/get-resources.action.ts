@@ -12,7 +12,7 @@ export class GetResourcesAction {
     ) {}
 
     public async execute(projectId: number, userId: number): Promise<GetResourcesResponse> {
-        await this.projectService.validateAndCheckDeletability(projectId, userId);
+        await this.projectService.validateAndCheckExistence(projectId, userId);
 
         const resources = await this.resourceRepository.findByProjectId(projectId, ['fields']);
 

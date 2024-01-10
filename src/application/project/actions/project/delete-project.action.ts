@@ -11,7 +11,7 @@ export class DeleteProjectAction {
     ) {}
 
     public async execute(id: number, userId: number): Promise<void> {
-        await this.projectService.validateAndCheckDeletability(id, userId);
+        await this.projectService.validateAndCheckExistence(id, userId);
 
         await this.projectRepository.delete(id);
     }

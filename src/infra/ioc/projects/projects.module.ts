@@ -14,6 +14,7 @@ import { GetResourcesAction } from '../../../application/project/actions/resourc
 import { UpdateResourceAction } from '../../../application/project/actions/resource/update-resource.action';
 import { ProjectService } from '../../../domain/project/services/project.service';
 import { ResourceFieldService } from '../../../domain/project/services/resource-field.service';
+import { ResourceService } from '../../../domain/project/services/resource.service';
 import { ProjectsController } from '../../../ui/controllers/projects.controller';
 import { ProjectMapper } from '../../database/postgres/mappers/project.mapper';
 import { ResourceFieldMapper } from '../../database/postgres/mappers/resource-field.mapper';
@@ -42,6 +43,7 @@ import { ResourceRepository } from '../../database/postgres/repositories/resourc
         DeleteFieldAction,
         ResourceFieldService,
         ProjectService,
+        ResourceService,
     ],
 })
 export class ProjectsModule {}

@@ -31,12 +31,12 @@ describe('ResourceFieldService', () => {
     });
 
     it('should return exception if field not found', async () => {
-        jest.spyOn(service, 'validateAndCheckDeletability').mockImplementation(() => {
+        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
             return Promise.resolve(null);
         });
 
         try {
-            await service.validateAndCheckDeletability(crypto.randomUUID(), crypto.randomUUID());
+            await service.validateAndCheckExistence(crypto.randomUUID(), crypto.randomUUID());
         } catch (error) {
             expect(error.status).toBe(404);
             expect(error.message).toBe('Field not found');
@@ -45,14 +45,14 @@ describe('ResourceFieldService', () => {
     });
 
     it('should return exception on modifying field assigned to another resource', async () => {
-        jest.spyOn(service, 'validateAndCheckDeletability').mockImplementation(() => {
+        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
             return Promise.resolve(
                 new ResourceFieldEntity('name', FieldTypeEnum.ARRAY, 2, crypto.randomUUID()),
             );
         });
 
         try {
-            await service.validateAndCheckDeletability(crypto.randomUUID(), crypto.randomUUID());
+            await service.validateAndCheckExistence(crypto.randomUUID(), crypto.randomUUID());
         } catch (error) {
             expect(error.status).toBe(404);
             expect(error.message).toBe('Field not found');
@@ -61,14 +61,14 @@ describe('ResourceFieldService', () => {
     });
 
     it('should return exception if field is primary key', async () => {
-        jest.spyOn(service, 'validateAndCheckDeletability').mockImplementation(() => {
+        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
             return Promise.resolve(
                 new ResourceFieldEntity('name', FieldTypeEnum.PRIMARY_KEY, 1, crypto.randomUUID()),
             );
         });
 
         try {
-            await service.validateAndCheckDeletability(crypto.randomUUID(), crypto.randomUUID());
+            await service.validateAndCheckExistence(crypto.randomUUID(), crypto.randomUUID());
         } catch (error) {
             expect(error.status).toBe(422);
             expect(error.message).toBe('Field not found');
