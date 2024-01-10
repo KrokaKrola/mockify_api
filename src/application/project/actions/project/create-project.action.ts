@@ -31,6 +31,6 @@ export class CreateProjectAction {
         const createdProject = new ProjectEntity(dto.name, userId);
         const result = await this.projectRepository.save(createdProject);
 
-        return new CreateProjectResponse(result.publicId, createdProject.name);
+        return new CreateProjectResponse(result.id, createdProject.name, createdProject.publicId);
     }
 }

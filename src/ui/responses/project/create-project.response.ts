@@ -1,10 +1,13 @@
 export class CreateProjectResponse {
     public name: string;
 
-    public id: string;
+    public id: number;
 
-    constructor(id: string, name: string) {
+    public publicId: string;
+
+    constructor(id: number, name: string, publicId: string) {
         this.id = id;
         this.name = name;
+        this.publicId = publicId;
     }
 }

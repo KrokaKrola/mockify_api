@@ -1,14 +1,17 @@
 import type { ProjectEntity } from '../../../domain/project/entities/project.entity';
 
 class ProjectResponse {
-    constructor(id: string, name: string) {
+    constructor(id: number, name: string, projectId: string) {
         this.id = id;
         this.name = name;
+        this.projectId = projectId;
     }
 
-    public id: string;
+    public id: number;
 
     public name: string;
+
+    public projectId: string;
 }
 
 export class GetProjectsResponse {
@@ -16,7 +19,7 @@ export class GetProjectsResponse {
 
     constructor(projects: ProjectEntity[]) {
         this.projects = projects.map((project) => {
-            return new ProjectResponse(project.publicId, project.name);
+            return new ProjectResponse(project.id, project.name, project.publicId);
         });
     }
 }
