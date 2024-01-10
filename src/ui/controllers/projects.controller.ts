@@ -28,6 +28,7 @@ import { GetResourcesAction } from '../../application/project/actions/resource/g
 import { UpdateResourceAction } from '../../application/project/actions/resource/update-resource.action';
 import { ProjectOwnershipGuard } from '../../domain/project/guards/project-ownership.guard';
 import { ResourceOwnershipGuard } from '../../domain/project/guards/resource-ownership.guard';
+import { User } from '../../domain/user/decorators/user.decorator';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { CreateFieldRequest } from '../requests/project/create-field.request';
 import { CreateProjectRequest } from '../requests/project/create-project.request';
@@ -79,15 +80,18 @@ export class ProjectsController {
     public async update(
         @Body() dto: UpdateProjectRequest,
         @Param('id', ParseIntPipe) id: number,
-        @Req() req: Request,
+        @User() user: Request['user'],
     ): Promise<UpdateProjectResponse> {
-        return this.updateProjectAction.execute(dto, id, req.user.id);
+        return this.updateProjectAction.execute(dto, id, user.id);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    public async delete(@Param('id', ParseIntPipe) id: number, @Req() req: Request): Promise<void> {
-        return this.deleteProjectAction.execute(id, req.user.id);
+    public async delete(
+        @Param('id', ParseIntPipe) id: number,
+        @User() user: Request['user'],
+    ): Promise<void> {
+        return this.deleteProjectAction.execute(id, user.id);
     }
 
     @Post(':id/resources')
