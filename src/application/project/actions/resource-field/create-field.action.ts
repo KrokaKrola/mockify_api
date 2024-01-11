@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { ResourceFieldEntity } from '../../../../domain/project/entities/resource-field.entity';
+import { ProjectService } from '../../../../domain/project/services/project.service';
+import { ResourceService } from '../../../../domain/project/services/resource.service';
 import { ResourceFieldRepository } from '../../../../infra/database/postgres/repositories/resource-field.repository';
-import { ResourceRepository } from '../../../../infra/database/postgres/repositories/resource.repository';
 import { ResourceExistsException } from '../../../../infra/exceptions/resource-exists.exception';
 import { CreateFieldResponse } from '../../../../ui/responses/project/create-field.response';
 
@@ -12,13 +13,22 @@ import type { CreateFieldRequest } from '../../../../ui/requests/project/create-
 export class CreateFieldAction {
     constructor(
         private readonly resourceFieldRepository: ResourceFieldRepository,
-        private readonly resourceRepository: ResourceRepository,
+        private readonly projectService: ProjectService,
+        private readonly resourceService: ResourceService,
     ) {}
 
     public async execute(
         dto: CreateFieldRequest,
+        projectId: number,
         resourceId: string,
+        userId: number,
     ): Promise<CreateFieldResponse> {
+        await this.projectService.validateAndCheckExistence(projectId, userId);
+
+        const resource = await this.resourceService.validateAndCheckExistence(
+            projectId,
+            resourceId,
+        );
         const resourceField = await this.resourceFieldRepository.findByName(dto.name);
 
         if (resourceField) {
@@ -27,13 +37,10 @@ export class CreateFieldAction {
             );
         }
 
-        const resource = await this.resourceRepository.findByPublicId(resourceId);
         const resourceFields = await this.resourceFieldRepository.findByResourceId(resource.id);
 
         if (resourceFields.length >= 20) {
-            throw new ResourceExistsException(
-                `Resource field with name "${dto.name}" already exists`,
-            );
+            throw new ResourceExistsException(`Resource "${resource.name}" already has 20 fields`);
         }
 
         let field = new ResourceFieldEntity(dto.name, dto.fieldType, resource.id);

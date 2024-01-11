@@ -26,8 +26,6 @@ import { CreateResourceAction } from '../../application/project/actions/resource
 import { DeleteResourceAction } from '../../application/project/actions/resource/delete-resource.action';
 import { GetResourcesAction } from '../../application/project/actions/resource/get-resources.action';
 import { UpdateResourceAction } from '../../application/project/actions/resource/update-resource.action';
-import { ProjectOwnershipGuard } from '../../domain/project/guards/project-ownership.guard';
-import { ResourceOwnershipGuard } from '../../domain/project/guards/resource-ownership.guard';
 import { User } from '../../domain/user/decorators/user.decorator';
 import { AccessTokenGuard } from '../../infra/auth/guards/access-token.guard';
 import { CreateFieldRequest } from '../requests/project/create-field.request';
@@ -132,31 +130,34 @@ export class ProjectsController {
     }
 
     @Post(':id/resources/:resourceId/fields')
-    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async createField(
         @Body() dto: CreateFieldRequest,
+        @Param('id', ParseIntPipe) id: number,
         @Param('resourceId') resourceId: string,
+        @User() user: Request['user'],
     ): Promise<CreateFieldResponse> {
-        return this.createFieldAction.execute(dto, resourceId);
+        return this.createFieldAction.execute(dto, id, resourceId, user.id);
     }
 
     @Patch(':id/resources/:resourceId/fields/:fieldId')
-    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     public async updateField(
         @Body() dto: UpdateFieldRequest,
+        @Param('id', ParseIntPipe) id: number,
         @Param('fieldId') fieldId: string,
         @Param('resourceId') resourceId: string,
+        @User() user: Request['user'],
     ): Promise<UpdateFieldResponse> {
-        return this.updateFieldAction.execute(dto, resourceId, fieldId);
+        return this.updateFieldAction.execute(dto, id, resourceId, fieldId, user.id);
     }
 
     @Delete(':id/resources/:resourceId/fields/:fieldId')
-    @UseGuards(ProjectOwnershipGuard, ResourceOwnershipGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     public async deleteField(
-        @Param('fieldId') fieldId: string,
+        @Param('id', ParseIntPipe) id: number,
         @Param('resourceId') resourceId: string,
+        @Param('fieldId') fieldId: string,
+        @User() user: Request['user'],
     ): Promise<void> {
-        return this.deleteFieldAction.execute(resourceId, fieldId);
+        return this.deleteFieldAction.execute(id, resourceId, fieldId, user.id);
     }
 }
