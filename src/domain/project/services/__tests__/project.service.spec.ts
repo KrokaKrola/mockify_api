@@ -1,30 +1,37 @@
 import { Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ProjectMapper } from '../../../../infra/database/postgres/mappers/project.mapper';
-import { PostgresModule } from '../../../../infra/database/postgres/postgres.module';
 import { ProjectRepository } from '../../../../infra/database/postgres/repositories/project.repository';
 import { ResourceNotFoundException } from '../../../../infra/exceptions/resource-not-found.exception';
-import { AppConfigModule } from '../../../../infra/ioc/app-config/app-config.module';
 import { ProjectEntity } from '../../entities/project.entity';
 import { ProjectService } from '../project.service';
 
 describe('ProjectService', () => {
     let service: ProjectService;
+    let projectRepositoryMock: jest.Mocked<ProjectRepository>;
 
     beforeAll(async () => {
+        const mockRepository: Partial<ProjectRepository> = {
+            findByPublicId: jest.fn(),
+            findById: jest.fn(),
+        };
+
+        projectRepositoryMock = mockRepository as jest.Mocked<ProjectRepository>;
+
         const moduleRef = await Test.createTestingModule({
-            imports: [AppConfigModule, PostgresModule, TypeOrmModule.forFeature([ProjectMapper])],
-            providers: [ProjectRepository, ProjectService],
+            providers: [
+                ProjectService,
+                {
+                    provide: ProjectRepository,
+                    useValue: projectRepositoryMock,
+                },
+            ],
         }).compile();
 
         service = moduleRef.get<ProjectService>(ProjectService);
     });
 
     it('should return exception if project not found', async () => {
-        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
-            return Promise.resolve(null);
-        });
+        projectRepositoryMock.findById.mockResolvedValueOnce(null);
 
         try {
             await service.validateAndCheckExistence(1, 1);
@@ -36,9 +43,7 @@ describe('ProjectService', () => {
     });
 
     it('should return exception on modifying project assigned to another user', async () => {
-        jest.spyOn(service, 'validateAndCheckExistence').mockImplementation(() => {
-            return Promise.resolve(new ProjectEntity('name', 2, 1));
-        });
+        projectRepositoryMock.findById.mockResolvedValueOnce(new ProjectEntity('name', 2, 1));
 
         try {
             await service.validateAndCheckExistence(1, 1);
