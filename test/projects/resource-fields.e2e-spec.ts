@@ -197,4 +197,181 @@ describe('Project - Resource Fields (e2e)', () => {
                 .set('Authorization', `Bearer ${accessToken}`);
         });
     });
+
+    describe('update field', () => {
+        it('should update a field', async () => {
+            const createProjectResponse = await request(app.getHttpServer())
+                .post('/projects')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test project',
+                })
+                .expect(201);
+
+            const createResourceResponse = await request(app.getHttpServer())
+                .post(`/projects/${createProjectResponse.body.id}/resources`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test resource',
+                })
+                .expect(201);
+
+            const createFieldResponse = await request(app.getHttpServer())
+                .post(
+                    `/projects/${createProjectResponse.body.id}/resources/${createResourceResponse.body.id}/fields`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field',
+                    fieldType: 'string',
+                    value: 'test',
+                })
+                .expect(201);
+
+            await request(app.getHttpServer())
+                .patch(
+                    `/projects/${createProjectResponse.body.id}/resources/${createResourceResponse.body.id}/fields/${createFieldResponse.body.id}`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field_updated',
+                    fieldType: 'string',
+                    value: 'test_updated',
+                })
+                .expect(200);
+
+            const getResourceResponse = await request(app.getHttpServer())
+                .get(`/projects/${createProjectResponse.body.id}/resources/`)
+                .set('Authorization', `Bearer ${accessToken}`);
+
+            const fields = getResourceResponse.body.resources[0].fields;
+
+            expect(fields).toHaveLength(3);
+            expect(fields[0].name).toBe('id');
+            expect(fields[0].fieldType).toBe('primaryKey');
+            expect(fields[1].name).toBe('string_field_updated');
+            expect(fields[1].fieldType).toBe('string');
+            // expect(fields[1].value).toBe('test_updated');
+
+            await request(app.getHttpServer())
+                .delete(`/projects/${createProjectResponse.body.id}`)
+                .set('Authorization', `Bearer ${accessToken}`);
+        });
+
+        it('should not update a field if the project does not exist', async () => {
+            const createProjectResponse = await request(app.getHttpServer())
+                .post('/projects')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test project',
+                })
+                .expect(201);
+
+            const createResourceResponse = await request(app.getHttpServer())
+                .post(`/projects/${createProjectResponse.body.id}/resources`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test resource',
+                })
+                .expect(201);
+
+            const createFieldResponse = await request(app.getHttpServer())
+                .post(
+                    `/projects/${createProjectResponse.body.id}/resources/${createResourceResponse.body.id}/fields`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field',
+                    fieldType: 'string',
+                    value: 'test',
+                })
+                .expect(201);
+
+            const fieldResourceResponse = await request(app.getHttpServer())
+                .patch(
+                    `/projects/99999/resources/${createResourceResponse.body.id}/fields/${createFieldResponse.body.id}`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field_updated',
+                    fieldType: 'string',
+                    value: 'test_updated',
+                })
+                .expect(404);
+
+            expect(fieldResourceResponse.body.message).toBe('Project not found');
+
+            await request(app.getHttpServer())
+                .delete(`/projects/${createProjectResponse.body.id}`)
+                .set('Authorization', `Bearer ${accessToken}`);
+        });
+
+        it('should not update a field if the resource does not exist', async () => {
+            const createProjectResponse = await request(app.getHttpServer())
+                .post('/projects')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test project',
+                })
+                .expect(201);
+
+            const createFieldResponse = await request(app.getHttpServer())
+                .post(
+                    `/projects/${
+                        createProjectResponse.body.id
+                    }/resources/${crypto.randomUUID()}/fields`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field',
+                    fieldType: 'string',
+                    value: 'test',
+                })
+                .expect(404);
+
+            expect(createFieldResponse.body.message).toBe('Resource not found');
+
+            await request(app.getHttpServer())
+                .delete(`/projects/${createProjectResponse.body.id}`)
+                .set('Authorization', `Bearer ${accessToken}`);
+        });
+
+        it('should not update a field if the field does not exist', async () => {
+            const createProjectResponse = await request(app.getHttpServer())
+                .post('/projects')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test project',
+                })
+                .expect(201);
+
+            const createResourceResponse = await request(app.getHttpServer())
+                .post(`/projects/${createProjectResponse.body.id}/resources`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'Test resource',
+                })
+                .expect(201);
+
+            const fieldResourceResponse = await request(app.getHttpServer())
+                .patch(
+                    `/projects/${createProjectResponse.body.id}/resources/${
+                        createResourceResponse.body.id
+                    }/fields/${crypto.randomUUID()}`,
+                )
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    name: 'string_field_updated',
+                    fieldType: 'string',
+                    value: 'test_updated',
+                })
+                .expect(404);
+
+            expect(fieldResourceResponse.body.message).toBe('Field not found');
+
+            await request(app.getHttpServer())
+                .delete(`/projects/${createProjectResponse.body.id}`)
+                .set('Authorization', `Bearer ${accessToken}`);
+        });
+    });
 });
