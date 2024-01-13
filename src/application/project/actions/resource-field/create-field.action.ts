@@ -46,6 +46,6 @@ export class CreateFieldAction {
         let field = new ResourceFieldEntity(dto.name, dto.fieldType, resource.id);
         field = await this.resourceFieldRepository.save(field);
 
-        return new CreateFieldResponse(field.id, field.name, field.fieldType, field.value);
+        return new CreateFieldResponse(field.publicId, field.name, field.fieldType, field.value);
     }
 }

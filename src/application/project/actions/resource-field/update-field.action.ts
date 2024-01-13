@@ -38,6 +38,6 @@ export class UpdateFieldAction {
 
         await this.resourceFieldRepository.update({ publicId: fieldId }, field);
 
-        return new UpdateFieldResponse(field.id, field.name, field.fieldType, field.value);
+        return new UpdateFieldResponse(field.publicId, field.name, field.fieldType, field.value);
     }
 }

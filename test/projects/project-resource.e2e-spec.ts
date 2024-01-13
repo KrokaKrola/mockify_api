@@ -17,7 +17,8 @@ describe('Project - Resource (e2e)', () => {
 
         await app.init();
 
-        accessToken = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        const response = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        accessToken = response.accessToken;
     });
 
     describe('create resource', () => {
@@ -184,11 +185,11 @@ describe('Project - Resource (e2e)', () => {
 
             expect(createResourceResponse.body.name).toBe('Test resource');
 
-            const accessToken2 = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+            const accessToken2Response = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const createResourceResponse2 = await request(app.getHttpServer())
                 .post(`/projects/${createProjectResponse.body.id}/resources`)
-                .set('Authorization', `Bearer ${accessToken2}`)
+                .set('Authorization', `Bearer ${accessToken2Response.accessToken}`)
                 .send({
                     name: 'Test resource 2',
                 })

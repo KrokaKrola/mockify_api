@@ -1,7 +1,7 @@
 import type { FieldTypeEnum } from '../../../domain/project/enums/field-type.enum';
 
 export class UpdateFieldResponse {
-    public id: number;
+    public id: string;
 
     public name: string;
 
@@ -9,7 +9,7 @@ export class UpdateFieldResponse {
 
     public value: unknown;
 
-    constructor(id: number, name: string, fieldType: FieldTypeEnum, value: unknown) {
+    constructor(id: string, name: string, fieldType: FieldTypeEnum, value: unknown) {
         this.id = id;
         this.name = name;
         this.fieldType = fieldType;

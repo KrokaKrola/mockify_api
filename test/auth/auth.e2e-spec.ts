@@ -16,48 +16,33 @@ describe('Auth (e2e)', () => {
 
     describe('authorization', () => {
         it('should register user and allow to auth with this credentials', async () => {
-            const signUpResponse = await request(app.getHttpServer()).post('/auth/sign-up').send({
-                email: 'test+1@mail.ru',
-                password: '12345678',
-                passwordConfirmation: '12345678',
-            });
-
-            expect(signUpResponse.status).toBe(201);
-            expect(signUpResponse.body.email).toBe('test+1@mail.ru');
+            const signUpResponse = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const signInResponse = await request(app.getHttpServer()).post('/auth/sign-in').send({
-                email: 'test+1@mail.ru',
+                email: signUpResponse.email,
                 password: '12345678',
             });
 
             expect(signInResponse.status).toBe(201);
-            expect(signInResponse.body.email).toBe('test+1@mail.ru');
+            expect(signInResponse.body.email).toBe(signUpResponse.email);
         });
 
         it('should logout user with valid access token', async () => {
-            const signUpResponse = await request(app.getHttpServer()).post('/auth/sign-up').send({
-                email: 'test+2@mail.ru',
-                password: '12345678',
-                passwordConfirmation: '12345678',
-            });
+            const signUpResponse = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const logoutResponse = await request(app.getHttpServer())
                 .post('/auth/logout')
-                .set('Authorization', `Bearer ${signUpResponse.body.accessToken}`);
+                .set('Authorization', `Bearer ${signUpResponse.accessToken}`);
 
             expect(logoutResponse.status).toBe(204);
         });
 
         it('should refresh tokens', async () => {
-            const signUpResponse = await request(app.getHttpServer()).post('/auth/sign-up').send({
-                email: 'test+3@mail.ru',
-                password: '12345678',
-                passwordConfirmation: '12345678',
-            });
+            const signUpResponse = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const refreshTokensResponse = await request(app.getHttpServer())
                 .get('/auth/refresh')
-                .set('Authorization', `Bearer ${signUpResponse.body.refreshToken}`);
+                .set('Authorization', `Bearer ${signUpResponse.refreshToken}`);
 
             expect(refreshTokensResponse.status).toBe(200);
         });

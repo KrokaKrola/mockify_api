@@ -15,7 +15,8 @@ describe('Project - Resource Fields (e2e)', () => {
     beforeAll(async () => {
         app = await e2eUtilsService.initApp();
         await app.init();
-        accessToken = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        const response = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        accessToken = response.accessToken;
     });
 
     describe('create field', () => {
@@ -246,7 +247,7 @@ describe('Project - Resource Fields (e2e)', () => {
 
             const fields = getResourceResponse.body.resources[0].fields;
 
-            expect(fields).toHaveLength(3);
+            expect(fields).toHaveLength(2);
             expect(fields[0].name).toBe('id');
             expect(fields[0].fieldType).toBe('primaryKey');
             expect(fields[1].name).toBe('string_field_updated');

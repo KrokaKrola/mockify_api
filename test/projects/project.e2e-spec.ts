@@ -15,7 +15,8 @@ describe('Project (e2e)', () => {
 
         await app.init();
 
-        accessToken = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        const response = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+        accessToken = response.accessToken;
     });
 
     describe('create project', () => {
@@ -161,11 +162,11 @@ describe('Project (e2e)', () => {
                 })
                 .expect(201);
 
-            const newToken = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+            const newTokenResponse = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const updateProjectResponse = await request(app.getHttpServer())
                 .patch(`/projects/${createProjectResponse.body.id}`)
-                .set('Authorization', `Bearer ${newToken}`)
+                .set('Authorization', `Bearer ${newTokenResponse.accessToken}`)
                 .send({
                     name: 'Updated project',
                 })
@@ -214,11 +215,11 @@ describe('Project (e2e)', () => {
                 })
                 .expect(201);
 
-            const newToken = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
+            const newTokenResponse = await e2eUtilsService.authorizeUserAndGetAccessToken(app);
 
             const deleteProjectResponse = await request(app.getHttpServer())
                 .delete(`/projects/${createProjectResponse.body.id}`)
-                .set('Authorization', `Bearer ${newToken}`)
+                .set('Authorization', `Bearer ${newTokenResponse.accessToken}`)
                 .expect(404);
 
             expect(deleteProjectResponse.body.message).toBe('Project not found');

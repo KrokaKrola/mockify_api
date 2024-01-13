@@ -28,16 +28,25 @@ export class E2EUtilsService {
         return app;
     }
 
-    public async authorizeUserAndGetAccessToken(app: INestApplication): Promise<string> {
-        const emailQuantifier = Math.floor(Math.random() * (99999 - 1 + 1)) + 1;
+    public async authorizeUserAndGetAccessToken(app: INestApplication): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        email: string;
+    }> {
+        const emailQuantifier = Math.floor(Math.random() * (9999999 - 1 + 1)) + 1;
         const signUpResponse = await request(app.getHttpServer())
             .post('/auth/sign-up')
             .send({
                 email: `test+${emailQuantifier}@mail.com`,
                 password: '12345678',
                 passwordConfirmation: '12345678',
-            });
+            })
+            .expect(201);
 
-        return signUpResponse.body.accessToken;
+        return {
+            accessToken: signUpResponse.body.accessToken,
+            email: signUpResponse.body.email,
+            refreshToken: signUpResponse.body.refreshToken,
+        };
     }
 }
