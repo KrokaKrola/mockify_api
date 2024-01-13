@@ -205,7 +205,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post('/projects')
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test project',
+                    name: 'Test project ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -213,7 +213,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post(`/projects/${createProjectResponse.body.id}/resources`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test resource',
+                    name: 'Test resource ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -223,11 +223,14 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field',
+                    name: 'string_field' + e2eUtilsService.getRandomQuantifier(),
                     fieldType: 'string',
                     value: 'test',
                 })
                 .expect(201);
+
+            const updatedFieldName =
+                'string_field_updated' + +e2eUtilsService.getRandomQuantifier();
 
             await request(app.getHttpServer())
                 .patch(
@@ -235,7 +238,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field_updated',
+                    name: updatedFieldName,
                     fieldType: 'string',
                     value: 'test_updated',
                 })
@@ -250,7 +253,7 @@ describe('Project - Resource Fields (e2e)', () => {
             expect(fields).toHaveLength(2);
             expect(fields[0].name).toBe('id');
             expect(fields[0].fieldType).toBe('primaryKey');
-            expect(fields[1].name).toBe('string_field_updated');
+            expect(fields[1].name).toBe(updatedFieldName);
             expect(fields[1].fieldType).toBe('string');
             // expect(fields[1].value).toBe('test_updated');
 
@@ -264,7 +267,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post('/projects')
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test project',
+                    name: 'Test project ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -272,7 +275,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post(`/projects/${createProjectResponse.body.id}/resources`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test resource',
+                    name: 'Test resource ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -282,7 +285,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field',
+                    name: 'string_field' + e2eUtilsService.getRandomQuantifier(),
                     fieldType: 'string',
                     value: 'test',
                 })
@@ -294,7 +297,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field_updated',
+                    name: 'string_field_updated' + e2eUtilsService.getRandomQuantifier(),
                     fieldType: 'string',
                     value: 'test_updated',
                 })
@@ -312,7 +315,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post('/projects')
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test project',
+                    name: 'Test project ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -324,7 +327,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field',
+                    name: 'string_field' + e2eUtilsService.getRandomQuantifier(),
                     fieldType: 'string',
                     value: 'test',
                 })
@@ -342,7 +345,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post('/projects')
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test project',
+                    name: 'Test project ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -350,7 +353,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 .post(`/projects/${createProjectResponse.body.id}/resources`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'Test resource',
+                    name: 'Test resource ' + e2eUtilsService.getRandomQuantifier(),
                 })
                 .expect(201);
 
@@ -362,7 +365,7 @@ describe('Project - Resource Fields (e2e)', () => {
                 )
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({
-                    name: 'string_field_updated',
+                    name: 'string_field_updated' + e2eUtilsService.getRandomQuantifier(),
                     fieldType: 'string',
                     value: 'test_updated',
                 })

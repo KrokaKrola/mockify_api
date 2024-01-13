@@ -28,16 +28,19 @@ export class E2EUtilsService {
         return app;
     }
 
+    public getRandomQuantifier(): number {
+        return Math.floor(Math.random() * (9999999 - 1 + 1)) + 1;
+    }
+
     public async authorizeUserAndGetAccessToken(app: INestApplication): Promise<{
         accessToken: string;
         refreshToken: string;
         email: string;
     }> {
-        const emailQuantifier = Math.floor(Math.random() * (9999999 - 1 + 1)) + 1;
         const signUpResponse = await request(app.getHttpServer())
             .post('/auth/sign-up')
             .send({
-                email: `test+${emailQuantifier}@mail.com`,
+                email: `test+${this.getRandomQuantifier()}@mail.com`,
                 password: '12345678',
                 passwordConfirmation: '12345678',
             })
